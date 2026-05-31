@@ -1,57 +1,102 @@
 # Learning Agent
 
-Learning Agent 是一个面向 AI 知识学习的 Agent 原型。当前阶段聚焦 **AI 应用开发工程师面试问答**：用户选择应聘角色后进入面试对话，系统扮演面试官逐题提问，用户扮演面试者回答，结束后给出综合得分。
+Learning Agent 是一个真实的 AI 应用开发工程师面试官 Agent。它从简历和自我介绍开始，基于 AI 应用工程师知识题库 RAG 动态提问，并用结构化评分系统给出每题反馈和最终通过结果。
 
 综合得分达到 `80` 分及以上视为通过。
 
-## 当前能力
-
-- 角色选择：当前仅开放 `AI 应用开发工程师`
-- 面试对话：面试官围绕岗位认知、RAG、Agent、排查、上线评估和方案设计提问
-- 即时评分：每题根据关键词命中、回答完整度和结构化表达进行评分
-- 结果报告：输出综合得分、通过状态、优势能力和补强方向
-- 本地运行：当前版本不依赖外部 AI API，也不需要配置密钥
-
 ## 技术栈
 
-- React
-- TypeScript
-- Vite
-- lucide-react
+- Next.js App Router
+- LangGraph JS
+- OpenAI
+- Postgres + pgvector
+- Drizzle ORM
+- PDF / DOCX 简历解析
 
-## 本地开发
+## 当前能力
+
+- 上传 PDF / `.docx` 简历并抽取结构化候选人画像
+- 要求候选人自我介绍，并结合简历生成面试策略
+- 使用 LangGraph 编排面试流程
+- 从 AI 应用工程师知识题库检索 RAG 上下文
+- 动态生成面试问题、追问方向和评分 rubric
+- 每轮回答后输出结构化评分
+- 面试结束后生成总分、通过状态、优势、短板和学习建议
+
+## 本地启动
+
+复制环境变量示例：
+
+```bash
+cp .env.example .env.local
+```
+
+启动本地 pgvector：
+
+```bash
+docker compose up -d
+npm run db:migrate
+npm run ingest:knowledge
+```
+
+启动应用：
 
 ```bash
 npm install
 npm run dev
 ```
 
-默认开发地址：
+默认地址：
 
 ```bash
-http://localhost:5173
+http://127.0.0.1:5173
 ```
 
-## 构建
+> 如果没有配置 `OPENAI_API_KEY` 或 `DATABASE_URL`，应用会使用开发 fallback，方便本地 UI 和测试跑通。真实面试效果需要配置 OpenAI key，并启动 pgvector。
+
+## 环境变量
 
 ```bash
-npm run build
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+DATABASE_URL=postgres://learning_agent:learning_agent@127.0.0.1:5432/learning_agent
 ```
 
-## 代码检查
+## 题库
+
+默认题库在：
+
+```bash
+content/knowledge/ai-application-engineer.md
+```
+
+更新题库后执行：
+
+```bash
+npm run ingest:knowledge
+```
+
+## API
+
+- `POST /api/resumes/upload`
+- `POST /api/interviews`
+- `POST /api/interviews/:id/self-introduction`
+- `POST /api/interviews/:id/messages`
+- `GET /api/interviews/:id/report`
+
+## 检查命令
 
 ```bash
 npm run lint
+npm run build
+npm test
 ```
 
-## 后续规划
+## 迁移说明
 
-- 接入真实 LLM，让面试官根据回答动态追问
-- 增加更多应聘角色，例如 AI 产品经理、RAG 工程师、Agent 工程师
-- 支持面试记录持久化和历史复盘
-- 引入更细的评分 rubric 和人工校准样本
-- 增加题库管理、难度分层和训练模式
+当前项目不实现登录注册，使用 `dev-user` 占位。后续迁移到 `aicave.cn` 时，可以替换 `lib/auth.ts` 里的 `getCurrentUser()` 来接入已有用户体系。
 
 ## 安全说明
 
-仓库不会提交 `.env`、`.env.local` 等本地环境文件。后续如果接入模型 API，请只在本地环境变量或部署平台密钥管理中配置，不要把密钥写入代码或 README。
+不要提交 `.env`、`.env.local` 或任何 API key。OpenAI key 和数据库连接只应配置在本地环境变量或部署平台密钥管理中。
