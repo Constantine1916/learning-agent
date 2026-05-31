@@ -190,7 +190,7 @@ async function generateInterviewQuestion(input: {
     id: z.string().optional(),
   })
 
-  return invokeJson(
+  const question = await invokeJson(
     [
       {
         role: 'system',
@@ -206,12 +206,14 @@ async function generateInterviewQuestion(input: {
         )}\n\n历史消息：${formatMessages(input.messages)}\n\n历史评分：${JSON.stringify(input.scores)}`,
       },
     ],
-    schema.transform((question) => ({
-      ...question,
-      id: question.id || `q-${input.round}-${Date.now()}`,
-    })),
+    schema,
     () => fallbackQuestion(input),
   )
+
+  return {
+    ...question,
+    id: question.id || `q-${input.round}-${Date.now()}`,
+  }
 }
 
 async function scoreCandidateAnswer(input: {

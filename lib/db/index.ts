@@ -35,3 +35,12 @@ export function getDb() {
   }
   return globalDb.learningAgentDb
 }
+
+export async function closeDb() {
+  const globalDb = globalThis as GlobalDb
+  if (globalDb.learningAgentSql) {
+    await globalDb.learningAgentSql.end({ timeout: 5 })
+    delete globalDb.learningAgentSql
+    delete globalDb.learningAgentDb
+  }
+}

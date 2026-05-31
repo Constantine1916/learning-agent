@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS knowledge_chunks (
   competency text NOT NULL,
   content text NOT NULL,
   rubric jsonb,
-  embedding vector(1536),
+  embedding vector(1024),
   created_at timestamp NOT NULL DEFAULT now()
 );
 

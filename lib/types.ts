@@ -47,7 +47,7 @@ export const scoreResultSchema = z.object({
   rubric: z.array(
     z.object({
       label: z.string(),
-      score: z.number().int().min(0).max(20),
+      score: z.number().int().min(0).transform((score) => Math.min(score, 20)),
       feedback: z.string(),
     }),
   ),

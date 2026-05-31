@@ -4,6 +4,7 @@ import path from 'node:path'
 import { embedText } from '@/lib/agent/llm'
 import { getDb } from '@/lib/db'
 import { knowledgeChunks } from '@/lib/db/schema'
+import { isRagLexicalFallbackEnabled } from '@/lib/env'
 import { chunkKnowledgeMarkdown, lexicalScore } from '@/lib/rag/chunking'
 import { ROLE_ID, type KnowledgeChunk } from '@/lib/types'
 
@@ -40,7 +41,11 @@ export async function retrieveKnowledge(query: string, limit = 4): Promise<Knowl
         return result
       }
     } catch (error) {
-      console.warn('Falling back to local RAG retrieval:', error)
+      if (!isRagLexicalFallbackEnabled()) {
+        throw error
+      }
+
+      console.warn('Falling back to local lexical RAG retrieval:', error)
     }
   }
 

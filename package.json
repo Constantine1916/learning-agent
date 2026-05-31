@@ -9,10 +9,10 @@
     "lint": "eslint .",
     "start": "next start",
     "test": "vitest run",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:generate": "set -a; [ -f .env.local ] && . ./.env.local; set +a; drizzle-kit generate",
+    "db:migrate": "set -a; [ -f .env.local ] && . ./.env.local; set +a; drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "ingest:knowledge": "tsx scripts/ingest-knowledge.ts"
+    "ingest:knowledge": "set -a; [ -f .env.local ] && . ./.env.local; set +a; tsx scripts/ingest-knowledge.ts"
   },
   "dependencies": {
     "@langchain/langgraph": "^1.3.2",
