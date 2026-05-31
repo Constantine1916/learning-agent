@@ -6,6 +6,10 @@ export function getOpenAIEmbeddingModel() {
   return process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small'
 }
 
+export function getOpenAIBaseUrl() {
+  return process.env.OPENAI_BASE_URL || undefined
+}
+
 export function hasOpenAIKey() {
   return Boolean(process.env.OPENAI_API_KEY)
 }

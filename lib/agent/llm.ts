@@ -1,6 +1,6 @@
 import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai'
 import { z } from 'zod'
-import { getOpenAIEmbeddingModel, getOpenAIModel, hasOpenAIKey } from '@/lib/env'
+import { getOpenAIBaseUrl, getOpenAIEmbeddingModel, getOpenAIModel, hasOpenAIKey } from '@/lib/env'
 import { contentToText, parseJsonFromText } from '@/lib/agent/json'
 
 type ChatMessage = {
@@ -20,32 +20,56 @@ export async function invokeJson<T>(
   const model = new ChatOpenAI({
     model: getOpenAIModel(),
     maxRetries: 2,
+    configuration: {
+      baseURL: getOpenAIBaseUrl(),
+    },
   })
 
-  const response = await model.invoke(messages as any)
-  return parseJsonFromText(contentToText(response.content), schema)
+  try {
+    const response = await model.invoke(messages as any)
+    return parseJsonFromText(contentToText(response.content), schema)
+  } catch (error) {
+    console.warn('LLM JSON response failed validation; falling back to deterministic local result.', error)
+    return fallback()
+  }
 }
 
 export async function embedText(text: string): Promise<number[]> {
-  if (!hasOpenAIKey()) {
+  if (!hasOpenAIKey() || getOpenAIEmbeddingModel() === 'local-hash') {
     return hashEmbedding(text)
   }
 
   const embeddings = new OpenAIEmbeddings({
     model: getOpenAIEmbeddingModel(),
+    configuration: {
+      baseURL: getOpenAIBaseUrl(),
+    },
   })
-  return embeddings.embedQuery(text)
+  try {
+    return await embeddings.embedQuery(text)
+  } catch (error) {
+    console.warn('Embedding request failed; falling back to local hash embedding.', error)
+    return hashEmbedding(text)
+  }
 }
 
 export async function embedDocuments(texts: string[]): Promise<number[][]> {
-  if (!hasOpenAIKey()) {
+  if (!hasOpenAIKey() || getOpenAIEmbeddingModel() === 'local-hash') {
     return texts.map(hashEmbedding)
   }
 
   const embeddings = new OpenAIEmbeddings({
     model: getOpenAIEmbeddingModel(),
+    configuration: {
+      baseURL: getOpenAIBaseUrl(),
+    },
   })
-  return embeddings.embedDocuments(texts)
+  try {
+    return await embeddings.embedDocuments(texts)
+  } catch (error) {
+    console.warn('Embedding request failed; falling back to local hash embeddings.', error)
+    return texts.map(hashEmbedding)
+  }
 }
 
 function hashEmbedding(text: string, dimensions = 1536): number[] {
