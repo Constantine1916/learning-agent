@@ -151,6 +151,7 @@ async function embedWithOllama(texts: string[]): Promise<number[][]> {
     body: JSON.stringify({
       model: getOllamaEmbeddingModel(),
       input: texts,
+      dimensions: getEmbeddingDimensions(),
     }),
   })
 

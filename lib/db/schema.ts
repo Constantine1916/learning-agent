@@ -66,6 +66,6 @@ export const knowledgeChunks = pgTable('knowledge_chunks', {
   competency: text('competency').notNull(),
   content: text('content').notNull(),
   rubric: jsonb('rubric').$type<string[]>(),
-  embedding: vector('embedding', { dimensions: 1024 }),
+  embedding: vector('embedding', { dimensions: 1536 }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })

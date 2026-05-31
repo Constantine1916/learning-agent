@@ -37,11 +37,11 @@ export function getOllamaBaseUrl() {
 }
 
 export function getOllamaEmbeddingModel() {
-  return process.env.OLLAMA_EMBEDDING_MODEL || 'qwen3-embedding:0.6b'
+  return process.env.OLLAMA_EMBEDDING_MODEL || 'qwen3-embedding:4b'
 }
 
 export function getEmbeddingDimensions() {
-  const rawValue = process.env.EMBEDDING_DIMENSIONS || '1024'
+  const rawValue = process.env.EMBEDDING_DIMENSIONS || '1536'
   const dimensions = Number(rawValue)
 
   if (!Number.isInteger(dimensions) || dimensions <= 0) {

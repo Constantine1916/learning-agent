@@ -37,8 +37,10 @@ cp .env.example .env.local
 ```bash
 brew install ollama
 brew services start ollama
-ollama pull qwen3-embedding:0.6b
+ollama pull qwen3-embedding:4b
 ```
+
+本地默认使用 `qwen3-embedding:4b`，并通过 MRL 输出 `1536` 维向量。这样比 0.6B 模型更适合中文 RAG 质量，同时避开 pgvector HNSW 对高维向量索引的限制，也方便后续在 VPS 上切换到同为 1536 维的 API embedding。
 
 启动本地 Postgres + pgvector 后，初始化数据库并导入题库：
 
@@ -47,7 +49,7 @@ set -a
 source .env.local
 set +a
 psql "$DATABASE_URL" -f drizzle/0000_init.sql
-psql "$DATABASE_URL" -f drizzle/0001_embedding_ollama_1024.sql
+psql "$DATABASE_URL" -f drizzle/0002_embedding_ollama_4b_1536.sql
 npm run ingest:knowledge
 ```
 
@@ -76,8 +78,8 @@ OPENAI_TIMEOUT_MS=60000
 
 EMBEDDING_PROVIDER=ollama
 OLLAMA_BASE_URL=http://127.0.0.1:11434
-OLLAMA_EMBEDDING_MODEL=qwen3-embedding:0.6b
-EMBEDDING_DIMENSIONS=1024
+OLLAMA_EMBEDDING_MODEL=qwen3-embedding:4b
+EMBEDDING_DIMENSIONS=1536
 RAG_LEXICAL_FALLBACK=false
 
 DATABASE_URL=postgres://learning_agent:learning_agent@127.0.0.1:5432/learning_agent
