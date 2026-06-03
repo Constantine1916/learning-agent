@@ -1,14 +1,15 @@
 import { sql } from 'drizzle-orm'
 import { readFile } from 'node:fs/promises'
-import path from 'node:path'
 import { embedText } from '@/lib/agent/llm'
 import { getDb } from '@/lib/db'
 import { knowledgeChunks } from '@/lib/db/schema'
 import { isRagLexicalFallbackEnabled } from '@/lib/env'
+import { getInterviewBankKnowledgePath } from '@/lib/interview-bank/loader'
 import { chunkKnowledgeMarkdown, lexicalScore } from '@/lib/rag/chunking'
 import { ROLE_ID, type KnowledgeChunk } from '@/lib/types'
 
-const LOCAL_KNOWLEDGE_PATH = path.join(process.cwd(), 'content/knowledge/ai-application-engineer.md')
+const LOCAL_KNOWLEDGE_SOURCE_PATH = 'content/interview-bank/ai-application-engineer/knowledge.md'
+const LOCAL_KNOWLEDGE_PATH = getInterviewBankKnowledgePath(ROLE_ID)
 
 let localKnowledgeCache: KnowledgeChunk[] | null = null
 
@@ -62,7 +63,7 @@ export async function retrieveKnowledge(query: string, limit = 4): Promise<Knowl
 export async function loadLocalKnowledge(): Promise<KnowledgeChunk[]> {
   if (!localKnowledgeCache) {
     const markdown = await readFile(LOCAL_KNOWLEDGE_PATH, 'utf8')
-    localKnowledgeCache = chunkKnowledgeMarkdown(markdown, 'content/knowledge/ai-application-engineer.md', ROLE_ID)
+    localKnowledgeCache = chunkKnowledgeMarkdown(markdown, LOCAL_KNOWLEDGE_SOURCE_PATH, ROLE_ID)
   }
   return localKnowledgeCache
 }

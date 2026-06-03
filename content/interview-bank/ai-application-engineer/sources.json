@@ -1,0 +1,56 @@
+[
+  {
+    "id": "openai_prompt_engineering",
+    "title": "OpenAI Prompt Engineering Guide",
+    "url": "https://platform.openai.com/docs/guides/prompt-engineering",
+    "usage": "用于提炼 prompt 指令层级、上下文组织、输出格式和评估改进方向。"
+  },
+  {
+    "id": "openai_embeddings",
+    "title": "OpenAI Embeddings Guide",
+    "url": "https://platform.openai.com/docs/guides/embeddings",
+    "usage": "用于提炼 embedding、语义检索、向量搜索和模型迁移相关能力点。"
+  },
+  {
+    "id": "openai_evals",
+    "title": "OpenAI Evals Guide",
+    "url": "https://platform.openai.com/docs/guides/evals",
+    "usage": "用于提炼 LLM 应用评估、自动化测试、评分校准和回归验证方法。"
+  },
+  {
+    "id": "langgraph_overview",
+    "title": "LangGraph Overview",
+    "url": "https://docs.langchain.com/oss/javascript/langgraph/overview",
+    "usage": "用于设计 stateful workflow、节点、边、状态和 checkpoint 类面试流程。"
+  },
+  {
+    "id": "langchain_rag",
+    "title": "LangChain RAG Documentation",
+    "url": "https://docs.langchain.com/oss/javascript/langchain/rag",
+    "usage": "用于提炼 RAG ingestion、retrieval、generation 和应用集成能力点。"
+  },
+  {
+    "id": "anthropic_effective_agents",
+    "title": "Anthropic Building Effective Agents",
+    "url": "https://www.anthropic.com/engineering/building-effective-agents",
+    "usage": "用于提炼 Agent workflow、工具使用、简单优先、可控编排和评估原则。"
+  },
+  {
+    "id": "microsoft_rag_design",
+    "title": "Microsoft Azure RAG solution design and evaluation guide",
+    "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide",
+    "usage": "用于提炼企业级 RAG 数据治理、检索评估、质量指标和生产化要求。"
+  },
+  {
+    "id": "owasp_llm_top_10",
+    "title": "OWASP Top 10 for LLM and Gen AI Apps",
+    "url": "https://genai.owasp.org/llm-top-10/",
+    "usage": "用于提炼 prompt injection、敏感信息、工具越权和 AI 安全治理题目。"
+  },
+  {
+    "id": "llm_interview_questions",
+    "title": "llmgenai/LLMInterviewQuestions",
+    "url": "https://github.com/llmgenai/LLMInterviewQuestions",
+    "usage": "仅用于公开面试题型覆盖参考，最终题目均重新整理改写。"
+  }
+]

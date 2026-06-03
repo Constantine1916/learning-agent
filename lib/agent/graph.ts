@@ -1,6 +1,9 @@
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { z } from 'zod'
 import { invokeJson } from '@/lib/agent/llm'
+import { getCalibrationSamples, getInterviewBank, getQuestion, getRubric } from '@/lib/interview-bank/loader'
+import { selectInterviewQuestion } from '@/lib/interview-bank/planner'
+import type { BankQuestion, CalibrationSample, Rubric } from '@/lib/interview-bank/schemas'
 import { retrieveKnowledge } from '@/lib/rag/retriever'
 import {
   candidateProfileSchema,
@@ -189,17 +192,28 @@ async function generateInterviewQuestion(input: {
   const schema = questionSchema.extend({
     id: z.string().optional(),
   })
+  const bank = await getInterviewBank()
+  const selected = selectInterviewQuestion({
+    bank,
+    resume: input.resume,
+    candidateProfile: input.candidateProfile,
+    messages: input.messages,
+    scores: input.scores,
+    round: input.round,
+  })
 
   const question = await invokeJson(
     [
       {
         role: 'system',
         content:
-          '你是一个真实的 AI 应用开发工程师面试官。请结合候选人简历、自我介绍、历史回答和题库上下文进行动态提问。只输出 JSON。',
+          '你是一个真实的 AI 应用开发工程师面试官。请优先使用企业级结构化题库中的候选题，只根据候选人背景微调问法，不要偏离能力项和 rubric。只输出 JSON。',
       },
       {
         role: 'user',
-        content: `第 ${input.round}/${TARGET_ROUNDS} 轮。请生成一个有区分度的问题，避免重复历史问题。\n\n候选人画像：${JSON.stringify(
+        content: `第 ${input.round}/${TARGET_ROUNDS} 轮。请基于候选题生成一个有区分度的问题，避免重复历史问题。\n\n选题原因：${
+          selected.reason
+        }\n\n候选题：${formatBankQuestion(selected.question, selected.rubric)}\n\n候选人画像：${JSON.stringify(
           input.candidateProfile,
         )}\n\n简历：${JSON.stringify(input.resume.profile)}\n\n题库上下文：${formatChunks(
           input.chunks,
@@ -207,12 +221,23 @@ async function generateInterviewQuestion(input: {
       },
     ],
     schema,
-    () => fallbackQuestion(input),
+    () => bankQuestionToInterviewQuestion(selected.question, selected.competency.name, input.chunks),
   )
 
   return {
     ...question,
-    id: question.id || `q-${input.round}-${Date.now()}`,
+    id: selected.question.id,
+    competencyId: selected.question.competencyId,
+    competency: selected.competency.name,
+    difficulty: selected.question.difficulty,
+    type: selected.question.type,
+    rubricId: selected.question.rubricId,
+    intent: selected.question.intent,
+    expectedSignals: question.expectedSignals.length ? question.expectedSignals : selected.question.expectedSignals,
+    redFlags: selected.question.redFlags,
+    followUps: selected.question.followUps,
+    sourceTags: selected.question.sourceTags,
+    sourceIds: [...new Set([...question.sourceIds, ...input.chunks.map((chunk) => chunk.id)])].slice(0, 6),
   }
 }
 
@@ -222,6 +247,15 @@ async function scoreCandidateAnswer(input: {
   resume: ResumeRecord
   chunks: KnowledgeChunk[]
 }): Promise<ScoreResult> {
+  const bank = await getInterviewBank()
+  const bankQuestion = getQuestion(bank, input.question.id)
+  const rubric = input.question.rubricId
+    ? getRubric(bank, input.question.rubricId)
+    : bankQuestion
+      ? getRubric(bank, bankQuestion.rubricId)
+      : null
+  const calibrationSamples = bankQuestion ? getCalibrationSamples(bank, bankQuestion.id) : []
+
   return invokeJson(
     [
       {
@@ -233,11 +267,13 @@ async function scoreCandidateAnswer(input: {
         role: 'user',
         content: `问题：${JSON.stringify(input.question)}\n\n候选人回答：${input.answer}\n\n简历画像：${JSON.stringify(
           input.resume.profile,
-        )}\n\n题库上下文：${formatChunks(input.chunks)}\n\n请输出 0-100 分，80 分及以上 passed=true。`,
+        )}\n\n企业级评分 Rubric：${formatRubric(rubric)}\n\n校准样本：${formatCalibrationSamples(
+          calibrationSamples,
+        )}\n\n题库上下文：${formatChunks(input.chunks)}\n\n请输出 0-100 分，80 分及以上 passed=true。评分时必须引用候选人回答中的具体证据；不要因为提到关键词就给高分。`,
       },
     ],
     scoreResultSchema,
-    () => fallbackScore(input),
+    () => fallbackScore({ ...input, rubric, bankQuestion }),
   )
 }
 
@@ -279,22 +315,25 @@ function findLatestQuestion(messages: InterviewMessage[]): InterviewQuestion {
   }
 }
 
-function fallbackQuestion(input: {
-  chunks: KnowledgeChunk[]
-  scores: ScoreResult[]
-  round: number
-}): InterviewQuestion {
-  const fallback = fallbackQuestionBank[(input.round - 1) % fallbackQuestionBank.length]
-  const chunk =
-    input.chunks.find((item) => item.competency === fallback.competency) ??
-    input.chunks[(input.round - 1) % Math.max(input.chunks.length, 1)]
-  const competency = chunk?.competency ?? 'AI 应用工程'
+function bankQuestionToInterviewQuestion(
+  question: BankQuestion,
+  competency: string,
+  chunks: KnowledgeChunk[],
+): InterviewQuestion {
   return {
-    id: `fallback-q-${input.round}`,
-    competency: fallback.competency || competency,
-    question: fallback.question,
-    expectedSignals: fallback.expectedSignals,
-    sourceIds: chunk ? [chunk.id] : [],
+    id: question.id,
+    competencyId: question.competencyId,
+    competency,
+    difficulty: question.difficulty,
+    type: question.type,
+    rubricId: question.rubricId,
+    question: question.question,
+    intent: question.intent,
+    expectedSignals: question.expectedSignals,
+    redFlags: question.redFlags,
+    followUps: question.followUps,
+    sourceTags: question.sourceTags,
+    sourceIds: chunks.map((chunk) => chunk.id).slice(0, 6),
   }
 }
 
@@ -302,24 +341,32 @@ function fallbackScore(input: {
   question: InterviewQuestion
   answer: string
   chunks: KnowledgeChunk[]
+  rubric?: Rubric | null
+  bankQuestion?: BankQuestion | null
 }): ScoreResult {
-  const signals = input.question.expectedSignals.length > 0 ? input.question.expectedSignals : ['工程方案', '风险', '评估']
+  const signals =
+    input.bankQuestion?.expectedSignals ??
+    (input.question.expectedSignals.length > 0 ? input.question.expectedSignals : ['工程方案', '风险', '评估'])
   const normalized = input.answer.toLowerCase()
   const matched = signals.filter((signal) => signalMatched(signal, input.question.competency, normalized))
   const lengthScore = input.answer.length >= 180 ? 25 : input.answer.length >= 100 ? 18 : input.answer.length >= 50 ? 10 : 4
   const signalScore = Math.round((matched.length / Math.max(signals.length, 1)) * 55)
   const structureScore = /首先|其次|最后|指标|风险|方案|评估|监控|成本|延迟/.test(input.answer) ? 15 : 6
   const score = Math.min(100, lengthScore + signalScore + structureScore)
+  const rubricDimensions =
+    input.rubric?.dimensions.map((dimension) => dimension.label) ?? signals.slice(0, 5)
 
   return scoreResultSchema.parse({
     questionId: input.question.id,
     competency: input.question.competency,
     score,
     passed: score >= PASSING_SCORE,
-    rubric: signals.slice(0, 5).map((signal) => ({
-      label: signal,
-      score: matched.includes(signal) ? 16 : 8,
-      feedback: matched.includes(signal) ? '回答中有对应信号。' : '回答中该点还不够明确。',
+    rubric: rubricDimensions.slice(0, 5).map((label) => ({
+      label,
+      score: matched.some((signal) => signalMatched(signal, input.question.competency, label.toLowerCase()))
+        ? 16
+        : Math.min(20, Math.max(4, Math.round(score / 5))),
+      feedback: matched.length >= Math.ceil(signals.length / 2) ? '回答中有部分可采信证据。' : '回答证据不足，需要补充项目细节。',
     })),
     feedback: score >= PASSING_SCORE ? '回答较完整，具备继续深入追问的基础。' : '回答偏概念化，需要补充项目细节和指标。',
     improvement: '建议用真实项目说明输入、处理链路、评估指标、上线风险和复盘结果。',
@@ -327,58 +374,19 @@ function fallbackScore(input: {
   })
 }
 
-const fallbackQuestionBank: InterviewQuestion[] = [
-  {
-    id: 'fallback-rag',
-    competency: 'RAG 设计',
-    question: '请结合你的实际项目，完整说明一个企业知识库 RAG 系统应该如何设计，并讲清楚你会如何评估它是否可靠。',
-    expectedSignals: ['chunking 和 metadata', 'embedding、向量库、BM25 和 rerank', '引用、拒答和幻觉控制', 'eval、召回率、groundedness 和监控'],
-    sourceIds: [],
-  },
-  {
-    id: 'fallback-debug',
-    competency: '问题排查',
-    question: '上线后如果用户反馈模型回答不稳定、偶尔编造内容，你会按什么顺序排查并修复？',
-    expectedSignals: ['复现样本和 trace 日志', 'prompt、上下文和模板变量', 'RAG 召回、chunk 和 rerank', 'guardrail、灰度、报警和回滚'],
-    sourceIds: [],
-  },
-  {
-    id: 'fallback-agent',
-    competency: 'Agent 工程',
-    question: '什么时候你会引入 tool calling 或 Agent workflow？请说明工具 schema、权限和高风险动作控制。',
-    expectedSignals: ['工具调用适用场景', 'schema、参数校验和类型约束', '状态编排、日志和 trace', '权限、沙箱、幂等和人工确认'],
-    sourceIds: [],
-  },
-  {
-    id: 'fallback-eval',
-    competency: '上线评估',
-    question: '你如何判断一个 AI 应用已经可以上线？请给出效果、安全、成本和运维维度的上线门槛。',
-    expectedSignals: ['golden set 和自动 eval', '人工验收、红队和安全测试', '业务指标、准确率和满意度', '延迟、成本、监控、灰度和回滚'],
-    sourceIds: [],
-  },
-  {
-    id: 'fallback-architecture',
-    competency: '系统设计',
-    question: '如果让你设计这个面试官 Agent 的生产版本，你会如何拆分前端、API、Agent workflow、RAG 和数据层？',
-    expectedSignals: ['前端、API、workflow 和 RAG 分层', 'Postgres、pgvector、对象存储和队列', '限流、缓存、异步任务和重试', '日志、trace、成本和质量看板'],
-    sourceIds: [],
-  },
-  {
-    id: 'fallback-prompt',
-    competency: 'Prompt 工程',
-    question: '请说明你会如何设计一个稳定的面试官 Prompt，包括角色边界、输出格式、上下文裁剪和 prompt injection 防护。',
-    expectedSignals: ['system、developer 和 user 指令边界', 'JSON schema、few-shot 和错误恢复', '上下文裁剪、压缩和优先级', 'prompt injection、防越权和版本评估'],
-    sourceIds: [],
-  },
-]
-
 const competencyKeywords: Record<string, string[]> = {
-  'RAG 设计': ['chunk', 'metadata', 'embedding', '向量', 'bm25', 'hybrid', 'rerank', '引用', 'citation', '拒答', '幻觉', 'eval', '召回', 'groundedness', '监控'],
-  问题排查: ['复现', 'trace', '日志', 'prompt', '上下文', '模板', 'rag', 'chunk', 'rerank', 'temperature', 'guardrail', '灰度', '报警', '回滚', 'eval'],
-  'Agent 工程': ['tool', '工具', 'schema', '参数', '校验', 'workflow', '状态', 'trace', '权限', '沙箱', '幂等', '重试', '限流', '人工确认', '回滚'],
-  上线评估: ['golden', 'eval', '红队', '验收', '业务', '准确率', '满意度', '延迟', '成本', '并发', '缓存', '监控', '灰度', '回滚'],
-  系统设计: ['前端', 'api', 'workflow', 'rag', 'postgres', 'pgvector', '队列', '对象存储', '限流', '缓存', '异步', '日志', 'trace', '成本'],
+  'LLM API 工程': ['openai', 'api', 'baseurl', 'model', 'streaming', 'timeout', 'retry', '限流', '成本', '延迟', 'token'],
   'Prompt 工程': ['system', 'developer', 'user', 'json', 'schema', 'few-shot', '错误恢复', '上下文', '裁剪', '压缩', 'prompt injection', '越权', '版本'],
+  结构化输出: ['json', 'schema', 'zod', 'pydantic', '校验', '字段', '工具', '事务', '审计', 'fallback'],
+  'RAG 数据治理': ['chunk', 'metadata', '文档', '解析', '清洗', '去重', '权限', '版本', '增量', '删除', '回滚'],
+  向量检索: ['embedding', '向量', '维度', 'cosine', 'pgvector', 'hnsw', 'bm25', 'hybrid', 'rerank', '召回', 'mrr', 'ndcg'],
+  'RAG 评估': ['引用', 'source', 'groundedness', 'faithfulness', 'recall', 'golden', 'eval', '拒答', '冲突', '反馈'],
+  'Agent 工具调用': ['tool', '工具', 'schema', '参数', '校验', 'workflow', '状态', 'trace', '权限', '沙箱', '幂等', '人工确认'],
+  '对话状态管理': ['session', 'message', '状态', '记忆', 'summary', 'checkpoint', '历史', '画像', 'ttl', '删除'],
+  生产排查: ['复现', 'trace', '日志', 'prompt', 'model', 'retrieved', 'chunk', 'rerank', '缓存', '灰度', '报警', '回滚'],
+  'AI 安全': ['prompt injection', '注入', '权限', '敏感', '隐私', '沙箱', '审计', '红队', '越权', 'pii'],
+  'AI 前端工程': ['streaming', 'sse', 'ndjson', 'websocket', '取消', '重试', 'loading', '状态', '引用', '报告'],
+  系统设计: ['前端', 'api', 'workflow', 'rag', 'postgres', 'pgvector', '队列', '对象存储', '限流', '缓存', '异步', '日志', 'trace', '成本'],
 }
 
 function signalMatched(signal: string, competency: string, normalizedAnswer: string): boolean {
@@ -427,4 +435,62 @@ function formatChunks(chunks: KnowledgeChunk[]): string {
 
 function formatMessages(messages: InterviewMessage[]): string {
   return messages.map((message) => `${message.role}: ${message.content}`).join('\n')
+}
+
+function formatBankQuestion(question: BankQuestion, rubric: Rubric): string {
+  return JSON.stringify(
+    {
+      id: question.id,
+      competencyId: question.competencyId,
+      rubricId: question.rubricId,
+      difficulty: question.difficulty,
+      type: question.type,
+      question: question.question,
+      intent: question.intent,
+      expectedSignals: question.expectedSignals,
+      redFlags: question.redFlags,
+      followUps: question.followUps,
+      rubricDimensions: rubric.dimensions.map((dimension) => ({
+        label: dimension.label,
+        weight: dimension.weight,
+        excellent: dimension.excellent,
+      })),
+    },
+    null,
+    2,
+  )
+}
+
+function formatRubric(rubric: Rubric | null): string {
+  if (!rubric) {
+    return '未找到结构化 rubric，请按问题 expectedSignals 评分。'
+  }
+
+  return JSON.stringify(
+    {
+      id: rubric.id,
+      competencyId: rubric.competencyId,
+      dimensions: rubric.dimensions,
+      redFlags: rubric.redFlags,
+    },
+    null,
+    2,
+  )
+}
+
+function formatCalibrationSamples(samples: CalibrationSample[]): string {
+  if (samples.length === 0) {
+    return '当前题目暂无校准样本，请按 rubric 严格评分。'
+  }
+
+  return JSON.stringify(
+    samples.map((sample) => ({
+      quality: sample.quality,
+      expectedScore: sample.expectedScore,
+      answer: sample.answer,
+      rationale: sample.rationale,
+    })),
+    null,
+    2,
+  )
 }

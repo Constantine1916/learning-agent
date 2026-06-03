@@ -1,0 +1,614 @@
+[
+  {
+    "id": "llm_api_001",
+    "competencyId": "llm_api_engineering",
+    "rubricId": "rubric_llm_api_engineering",
+    "difficulty": "mid",
+    "type": "scenario",
+    "question": "你要为一个企业内部知识库问答系统选择 LLM 模型，会从哪些维度评估和决策？",
+    "intent": "考察模型选择、供应商适配、成本延迟和上线约束。",
+    "expectedSignals": ["任务复杂度和上下文窗口", "中文效果和结构化能力", "成本、延迟和稳定性", "供应商兼容和灰度升级", "失败降级和观测指标"],
+    "redFlags": ["只选择最强模型", "不考虑成本和延迟", "不考虑模型版本和供应商迁移"],
+    "followUps": {
+      "ifTooAbstract": ["请结合一个具体功能说明你为什么选这个模型。"],
+      "ifMissingProduction": ["如果该模型在高峰期超时或限流，你会怎么降级？"],
+      "ifStrongAnswer": ["如果线上要同时支持本地模型和 API 模型，你的 adapter 会怎么设计？"]
+    },
+    "sourceTags": ["openai-api", "model-selection"]
+  },
+  {
+    "id": "llm_api_002",
+    "competencyId": "llm_api_engineering",
+    "rubricId": "rubric_llm_api_engineering",
+    "difficulty": "mid",
+    "type": "implementation",
+    "question": "请设计一个 OpenAI-compatible LLM 调用适配层，需要支持 baseURL、model、streaming、timeout、retry 和 JSON 输出。",
+    "intent": "验证候选人是否能把模型调用工程化封装。",
+    "expectedSignals": ["provider 配置抽象", "超时重试和错误分类", "streaming 与非 streaming 统一接口", "结构化输出校验", "日志和 token 成本记录"],
+    "redFlags": ["业务代码直接散落 SDK 调用", "没有错误恢复", "没有配置化模型选择"],
+    "followUps": {
+      "ifTooAbstract": ["你会把哪些字段放进环境变量，哪些放进数据库配置？"],
+      "ifMissingProduction": ["如何做模型升级的灰度和回滚？"],
+      "ifStrongAnswer": ["如何记录每次调用的 prompt version、model version 和 token usage？"]
+    },
+    "sourceTags": ["provider-adapter", "structured-output", "observability"]
+  },
+  {
+    "id": "llm_api_003",
+    "competencyId": "llm_api_engineering",
+    "rubricId": "rubric_llm_api_engineering",
+    "difficulty": "senior",
+    "type": "tradeoff",
+    "question": "某个 AI 功能质量很好但 P95 延迟超过 12 秒、成本也偏高，你会如何系统优化？",
+    "intent": "考察候选人对延迟、成本、质量的系统权衡。",
+    "expectedSignals": ["latency breakdown", "小模型路由和缓存", "上下文压缩和检索优化", "流式体验和异步任务", "质量回归验证"],
+    "redFlags": ["只建议换更快模型", "不衡量质量损失", "不拆解延迟来源"],
+    "followUps": {
+      "ifTooAbstract": ["请按模型、RAG、rerank、工具调用、前端五段拆解耗时。"],
+      "ifMissingProduction": ["你会设置哪些 SLA 和报警？"],
+      "ifStrongAnswer": ["如何判断缓存是否造成权限污染或答案过期？"]
+    },
+    "sourceTags": ["latency", "cost", "model-routing"]
+  },
+  {
+    "id": "prompt_001",
+    "competencyId": "prompt_context_engineering",
+    "rubricId": "rubric_prompt_context_engineering",
+    "difficulty": "mid",
+    "type": "concept",
+    "question": "system、developer、user 指令以及 RAG 检索内容在 prompt 里应该如何区分和组织？",
+    "intent": "考察指令层级、上下文可信度和 prompt injection 风险。",
+    "expectedSignals": ["指令优先级", "不可信检索内容隔离", "任务目标和输出格式", "上下文排序和裁剪", "注入防护"],
+    "redFlags": ["把检索内容当系统指令", "不区分用户输入和开发者约束", "认为 prompt 只是文案"],
+    "followUps": {
+      "ifTooAbstract": ["请给一个 RAG 问答 prompt 的结构示例。"],
+      "ifMissingProduction": ["如果文档里写着忽略系统提示，你会怎么处理？"],
+      "ifStrongAnswer": ["你会如何做 prompt 版本评估和回滚？"]
+    },
+    "sourceTags": ["prompt-engineering", "prompt-injection"]
+  },
+  {
+    "id": "prompt_002",
+    "competencyId": "prompt_context_engineering",
+    "rubricId": "rubric_prompt_context_engineering",
+    "difficulty": "mid",
+    "type": "implementation",
+    "question": "让模型稳定输出一个面试评分 JSON，你会如何设计 prompt、schema 校验和错误恢复？",
+    "intent": "验证候选人是否能把 prompt 和后端校验结合。",
+    "expectedSignals": ["明确 JSON schema", "response_format 或结构化输出", "Zod/Pydantic 校验", "失败重试和修复", "越界值和缺字段处理"],
+    "redFlags": ["只说让模型不要输出 markdown", "没有 schema 校验", "解析失败直接报错"],
+    "followUps": {
+      "ifTooAbstract": ["如果 score 返回 120 或字符串，你怎么处理？"],
+      "ifMissingProduction": ["重试还是 fallback？什么情况下人工审核？"],
+      "ifStrongAnswer": ["如何评估不同 prompt 版本的评分一致性？"]
+    },
+    "sourceTags": ["structured-output", "json-schema", "evals"]
+  },
+  {
+    "id": "prompt_003",
+    "competencyId": "prompt_context_engineering",
+    "rubricId": "rubric_prompt_context_engineering",
+    "difficulty": "senior",
+    "type": "debugging",
+    "question": "上线后发现同一个问题模型有时输出 JSON、有时输出解释文本，你会如何定位并修复？",
+    "intent": "考察 prompt、模型参数、上下文污染和校验恢复能力。",
+    "expectedSignals": ["复现样本和 prompt 版本", "上下文污染排查", "模型参数和 response format", "schema 校验与重试", "回归测试"],
+    "redFlags": ["只改一句 prompt", "不看真实请求上下文", "不建立测试集"],
+    "followUps": {
+      "ifTooAbstract": ["请说出你会记录哪些 trace 字段。"],
+      "ifMissingProduction": ["如何避免修复后影响其它场景？"],
+      "ifStrongAnswer": ["如何设计一个自动化 regression eval？"]
+    },
+    "sourceTags": ["prompt-debugging", "structured-output", "observability"]
+  },
+  {
+    "id": "structured_001",
+    "competencyId": "structured_outputs",
+    "rubricId": "rubric_structured_outputs",
+    "difficulty": "mid",
+    "type": "implementation",
+    "question": "你要让 Agent 输出候选人画像 ResumeProfile，如何设计 schema、校验和 fallback？",
+    "intent": "考察结构化抽取和后端可靠性。",
+    "expectedSignals": ["字段定义和必填约束", "数组和嵌套结构", "LLM 抽取与本地启发式 fallback", "错误提示", "隐私字段处理"],
+    "redFlags": ["直接保存原始模型输出", "不处理空文件或解析失败", "没有字段类型校验"],
+    "followUps": {
+      "ifTooAbstract": ["请举例说明 profile 里哪些字段必须存在。"],
+      "ifMissingProduction": ["如果简历解析文本很短或乱码，你如何返回错误？"],
+      "ifStrongAnswer": ["如何对解析结果做置信度和人工复核？"]
+    },
+    "sourceTags": ["resume-parsing", "json-schema"]
+  },
+  {
+    "id": "structured_002",
+    "competencyId": "structured_outputs",
+    "rubricId": "rubric_structured_outputs",
+    "difficulty": "senior",
+    "type": "scenario",
+    "question": "Agent 需要调用一个发邮件工具，请设计工具 schema、权限校验、人工确认和审计流程。",
+    "intent": "考察结构化工具协议和高风险动作控制。",
+    "expectedSignals": ["tool schema", "收件人和内容校验", "权限和最小化数据", "人工确认", "幂等和审计日志"],
+    "redFlags": ["模型可直接发送邮件", "无确认流程", "没有审计和幂等"],
+    "followUps": {
+      "ifTooAbstract": ["哪些参数必须由用户显式确认？"],
+      "ifMissingProduction": ["如何防止重复发送？"],
+      "ifStrongAnswer": ["如果工具结果失败但邮件实际已发送，你怎么处理一致性？"]
+    },
+    "sourceTags": ["tool-calling", "human-in-the-loop", "audit"]
+  },
+  {
+    "id": "structured_003",
+    "competencyId": "structured_outputs",
+    "rubricId": "rubric_structured_outputs",
+    "difficulty": "mid",
+    "type": "debugging",
+    "question": "LLM judge 有时漏掉 `passed` 字段或 rubric 分数越界，你会如何让评分系统可恢复？",
+    "intent": "考察评分结构化输出的健壮性。",
+    "expectedSignals": ["schema 校验", "重试修复", "默认值和边界裁剪", "错误日志", "人工复核阈值"],
+    "redFlags": ["忽略缺字段", "分数越界直接入库", "没有错误分类"],
+    "followUps": {
+      "ifTooAbstract": ["请说出哪些错误可以自动修复，哪些必须失败。"],
+      "ifMissingProduction": ["如何避免 fallback 评分误伤候选人？"],
+      "ifStrongAnswer": ["如何用校准样本测试 judge 稳定性？"]
+    },
+    "sourceTags": ["llm-judge", "validation", "calibration"]
+  },
+  {
+    "id": "rag_data_001",
+    "competencyId": "rag_data_governance",
+    "rubricId": "rubric_rag_data_governance",
+    "difficulty": "mid",
+    "type": "system-design",
+    "question": "你要把企业内部 PDF、Word、网页和飞书文档接入 RAG，完整的数据摄取流程怎么设计？",
+    "intent": "考察文档解析、清洗、切分、metadata 和索引治理。",
+    "expectedSignals": ["多格式解析", "清洗去重", "语义 chunking", "metadata 和权限", "增量更新和删除"],
+    "redFlags": ["直接全文 embedding", "不处理权限", "没有版本和删除机制"],
+    "followUps": {
+      "ifTooAbstract": ["请具体说 chunk metadata 里会有哪些字段。"],
+      "ifMissingProduction": ["文档权限变化后，索引如何更新？"],
+      "ifStrongAnswer": ["如何做索引重建的灰度和回滚？"]
+    },
+    "sourceTags": ["rag", "document-governance", "metadata"]
+  },
+  {
+    "id": "rag_data_002",
+    "competencyId": "rag_data_governance",
+    "rubricId": "rubric_rag_data_governance",
+    "difficulty": "mid",
+    "type": "tradeoff",
+    "question": "chunk size 和 overlap 应该如何选择？不同文档类型会有什么差异？",
+    "intent": "考察候选人是否理解 chunking 对召回和生成的影响。",
+    "expectedSignals": ["标题层级和语义边界", "表格/代码/FAQ 差异", "chunk size 与召回精度", "overlap 成本", "离线评估"],
+    "redFlags": ["固定 500 字一刀切", "不考虑语义完整性", "不评估切分效果"],
+    "followUps": {
+      "ifTooAbstract": ["对于 API 文档、制度文档、FAQ 分别怎么切？"],
+      "ifMissingProduction": ["如何判断新 chunking 策略更好？"],
+      "ifStrongAnswer": ["如何处理超长表格和图片 OCR？"]
+    },
+    "sourceTags": ["chunking", "evaluation"]
+  },
+  {
+    "id": "rag_data_003",
+    "competencyId": "rag_data_governance",
+    "rubricId": "rubric_rag_data_governance",
+    "difficulty": "senior",
+    "type": "debugging",
+    "question": "某批文档更新后，RAG 开始召回旧答案和无权限内容，你会如何排查和修复？",
+    "intent": "考察增量索引、权限治理和线上排查能力。",
+    "expectedSignals": ["doc id 和版本", "删除/更新事件", "权限 metadata filter", "索引重建和回滚", "坏例回归测试"],
+    "redFlags": ["只重跑 embedding", "不知道权限过滤位置", "无法追踪来源版本"],
+    "followUps": {
+      "ifTooAbstract": ["你会查哪些表和日志？"],
+      "ifMissingProduction": ["如何防止旧 chunk 残留？"],
+      "ifStrongAnswer": ["如何设计双索引灰度切换？"]
+    },
+    "sourceTags": ["incremental-indexing", "permissions", "debugging"]
+  },
+  {
+    "id": "vector_001",
+    "competencyId": "vector_retrieval",
+    "rubricId": "rubric_vector_retrieval",
+    "difficulty": "mid",
+    "type": "concept",
+    "question": "embedding 模型、向量维度、相似度算法和向量索引分别会影响 RAG 的哪些方面？",
+    "intent": "考察 embedding 和向量库基础。",
+    "expectedSignals": ["语义匹配能力", "维度和存储成本", "cosine/dot/L2", "HNSW/IVFFlat", "跨模型不可混用"],
+    "redFlags": ["不知道维度变化要重建库", "认为 embedding 模型可以随便混用", "不了解索引召回取舍"],
+    "followUps": {
+      "ifTooAbstract": ["为什么不同 embedding 模型的向量不能混在同一索引里？"],
+      "ifMissingProduction": ["如果线上要从本地 embedding 切到 API embedding，你怎么迁移？"],
+      "ifStrongAnswer": ["HNSW 参数如何影响召回和写入成本？"]
+    },
+    "sourceTags": ["embedding", "pgvector", "hnsw"]
+  },
+  {
+    "id": "vector_002",
+    "competencyId": "vector_retrieval",
+    "rubricId": "rubric_vector_retrieval",
+    "difficulty": "mid",
+    "type": "scenario",
+    "question": "用户问题很短，比如“报销流程”，纯向量检索效果不稳定，你会如何优化召回？",
+    "intent": "考察 query rewrite、hybrid search 和 rerank。",
+    "expectedSignals": ["query rewrite", "BM25/关键词召回", "metadata filter", "hybrid fusion", "rerank 和评估"],
+    "redFlags": ["只调大 topK", "忽略关键词检索", "不做评估"],
+    "followUps": {
+      "ifTooAbstract": ["请给出一个 query rewrite 的例子。"],
+      "ifMissingProduction": ["如何衡量优化是否真的提升？"],
+      "ifStrongAnswer": ["如何避免 query expansion 引入错误意图？"]
+    },
+    "sourceTags": ["hybrid-search", "query-rewrite", "rerank"]
+  },
+  {
+    "id": "vector_003",
+    "competencyId": "vector_retrieval",
+    "rubricId": "rubric_vector_retrieval",
+    "difficulty": "senior",
+    "type": "tradeoff",
+    "question": "检索召回 30 个 chunk，但模型上下文只能放 6 个，你会如何选择和压缩上下文？",
+    "intent": "考察 rerank、MMR、去重、上下文压缩和引用排序。",
+    "expectedSignals": ["rerank", "MMR 和去重", "metadata 优先级", "摘要压缩", "证据覆盖和引用"],
+    "redFlags": ["直接取前 6 个", "无去重和冲突处理", "不考虑证据覆盖"],
+    "followUps": {
+      "ifTooAbstract": ["你会如何处理多个 chunk 来自同一文档的重复内容？"],
+      "ifMissingProduction": ["压缩上下文后如何评估信息是否丢失？"],
+      "ifStrongAnswer": ["如何让答案引用被压缩前的原始 source？"]
+    },
+    "sourceTags": ["context-compression", "rerank", "citations"]
+  },
+  {
+    "id": "rag_eval_001",
+    "competencyId": "rag_generation_evaluation",
+    "rubricId": "rubric_rag_generation_evaluation",
+    "difficulty": "mid",
+    "type": "system-design",
+    "question": "如何为一个 RAG 知识库问答系统设计 golden set 和自动化评估？",
+    "intent": "考察 RAG 评估体系。",
+    "expectedSignals": ["真实用户问题采样", "标准答案和相关文档标注", "recall@k", "faithfulness", "LLM judge 校准"],
+    "redFlags": ["只人工随便问", "只看答案流畅", "不区分检索和生成指标"],
+    "followUps": {
+      "ifTooAbstract": ["请分别说检索阶段和生成阶段看哪些指标。"],
+      "ifMissingProduction": ["线上用户反馈如何回流到 golden set？"],
+      "ifStrongAnswer": ["LLM judge 有偏差，你怎么校准？"]
+    },
+    "sourceTags": ["evals", "rag-evaluation", "llm-judge"]
+  },
+  {
+    "id": "rag_eval_002",
+    "competencyId": "rag_generation_evaluation",
+    "rubricId": "rubric_rag_generation_evaluation",
+    "difficulty": "mid",
+    "type": "scenario",
+    "question": "如何让 RAG 回答必须基于检索证据、带引用，并在证据不足时拒答？",
+    "intent": "考察生成控制、引用和拒答。",
+    "expectedSignals": ["source id", "证据对齐", "groundedness", "低置信度拒答", "冲突处理"],
+    "redFlags": ["只靠一句 prompt 防幻觉", "没有引用机制", "不知道无答案如何处理"],
+    "followUps": {
+      "ifTooAbstract": ["请描述输出格式里引用字段怎么设计。"],
+      "ifMissingProduction": ["如果两个来源冲突，模型应该怎么回答？"],
+      "ifStrongAnswer": ["如何自动检测答案里的 unsupported claims？"]
+    },
+    "sourceTags": ["citations", "groundedness", "refusal"]
+  },
+  {
+    "id": "rag_eval_003",
+    "competencyId": "rag_generation_evaluation",
+    "rubricId": "rubric_rag_generation_evaluation",
+    "difficulty": "senior",
+    "type": "debugging",
+    "question": "上线后一周 RAG 满意度下降，但接口错误率正常，你会如何定位？",
+    "intent": "考察质量监控、数据漂移和回归评估。",
+    "expectedSignals": ["坏例采样", "文档更新和索引版本", "检索指标变化", "prompt/model 版本", "线上反馈和回滚"],
+    "redFlags": ["只看接口日志", "直接换模型", "没有历史基线"],
+    "followUps": {
+      "ifTooAbstract": ["你会从哪些 dashboard 看异常？"],
+      "ifMissingProduction": ["如何判断是检索问题还是生成问题？"],
+      "ifStrongAnswer": ["如何把这次事故沉淀成 regression test？"]
+    },
+    "sourceTags": ["observability", "rag-evaluation", "production"]
+  },
+  {
+    "id": "agent_tool_001",
+    "competencyId": "agent_tool_workflow",
+    "rubricId": "rubric_agent_tool_workflow",
+    "difficulty": "mid",
+    "type": "concept",
+    "question": "什么情况下应该让 Agent 调用工具，而不是让模型直接回答？",
+    "intent": "考察工具调用边界。",
+    "expectedSignals": ["实时数据", "外部系统操作", "数据库查询", "多步骤业务流程", "权限和审计"],
+    "redFlags": ["所有任务都让模型自由回答", "工具调用没有边界", "不校验工具结果"],
+    "followUps": {
+      "ifTooAbstract": ["请举一个必须调工具和一个不该调工具的例子。"],
+      "ifMissingProduction": ["工具调用前如何判断用户权限？"],
+      "ifStrongAnswer": ["工具返回结果不可信时，你怎么处理？"]
+    },
+    "sourceTags": ["tool-calling", "agent"]
+  },
+  {
+    "id": "agent_tool_002",
+    "competencyId": "agent_tool_workflow",
+    "rubricId": "rubric_agent_tool_workflow",
+    "difficulty": "senior",
+    "type": "system-design",
+    "question": "请用 LangGraph 这类 stateful workflow 设计一个 AI 面试官 Agent 的核心流程。",
+    "intent": "考察状态图、节点和流程终止条件。",
+    "expectedSignals": ["状态 schema", "parseResume/collectIntro/retrieve/ask/score/report 节点", "条件路由", "checkpoint 和恢复", "max rounds 和终止条件"],
+    "redFlags": ["只写一个大 prompt", "没有状态和终止条件", "不保存评分和题目计划"],
+    "followUps": {
+      "ifTooAbstract": ["请列出 InterviewState 里必须有哪些字段。"],
+      "ifMissingProduction": ["中途断线或模型失败时如何恢复？"],
+      "ifStrongAnswer": ["如何加入 human-in-the-loop 或面试官复核？"]
+    },
+    "sourceTags": ["langgraph", "stateful-agent", "workflow"]
+  },
+  {
+    "id": "agent_tool_003",
+    "competencyId": "agent_tool_workflow",
+    "rubricId": "rubric_agent_tool_workflow",
+    "difficulty": "senior",
+    "type": "debugging",
+    "question": "一个 Agent 在工具调用失败后开始编造工具结果，你会如何防止和修复？",
+    "intent": "考察工具失败处理和可靠性。",
+    "expectedSignals": ["工具结果 schema", "错误显式传递", "禁止编造", "重试和降级", "trace 与 replay"],
+    "redFlags": ["让模型自己判断工具是否成功", "失败后继续执行", "没有工具调用日志"],
+    "followUps": {
+      "ifTooAbstract": ["你会如何在 prompt 中表达工具失败？"],
+      "ifMissingProduction": ["哪些工具失败可以重试，哪些不能？"],
+      "ifStrongAnswer": ["如何设计幂等 key 和补偿事务？"]
+    },
+    "sourceTags": ["tool-failure", "reliability", "observability"]
+  },
+  {
+    "id": "memory_001",
+    "competencyId": "agent_state_memory",
+    "rubricId": "rubric_agent_state_memory",
+    "difficulty": "mid",
+    "type": "scenario",
+    "question": "多轮面试中，Agent 如何避免重复提问，并根据候选人历史回答动态调整问题？",
+    "intent": "考察状态、历史和题目计划。",
+    "expectedSignals": ["message history", "question plan", "scores", "covered competencies", "candidate profile"],
+    "redFlags": ["只靠模型记忆", "没有已问问题记录", "不根据评分调整"],
+    "followUps": {
+      "ifTooAbstract": ["请说出你会保存哪些 session 字段。"],
+      "ifMissingProduction": ["如果页面刷新，面试如何恢复？"],
+      "ifStrongAnswer": ["如何把低分能力项安排到后续追问？"]
+    },
+    "sourceTags": ["state", "memory", "interview-agent"]
+  },
+  {
+    "id": "memory_002",
+    "competencyId": "agent_state_memory",
+    "rubricId": "rubric_agent_state_memory",
+    "difficulty": "senior",
+    "type": "tradeoff",
+    "question": "短期对话记忆、长期用户画像、向量记忆和结构化状态分别适合存什么？",
+    "intent": "考察记忆分层和隐私。",
+    "expectedSignals": ["message history", "summary memory", "profile memory", "vector memory", "TTL 和删除"],
+    "redFlags": ["所有内容都长期保存", "不考虑用户同意", "不区分状态和知识库"],
+    "followUps": {
+      "ifTooAbstract": ["候选人的简历和面试回答应该保存多久？"],
+      "ifMissingProduction": ["如何处理用户删除数据请求？"],
+      "ifStrongAnswer": ["如何选择哪些历史进入下一轮 prompt？"]
+    },
+    "sourceTags": ["memory", "privacy", "state"]
+  },
+  {
+    "id": "memory_003",
+    "competencyId": "agent_state_memory",
+    "rubricId": "rubric_agent_state_memory",
+    "difficulty": "mid",
+    "type": "debugging",
+    "question": "Agent 多轮对话到后半段开始忘记前面承诺的评分维度，你会如何处理上下文和状态？",
+    "intent": "考察上下文窗口、摘要和结构化状态。",
+    "expectedSignals": ["结构化状态优先", "摘要历史", "只注入相关上下文", "rubric 固定", "checkpoint"],
+    "redFlags": ["继续把完整历史塞进 prompt", "不保存 rubric", "无法复现状态"],
+    "followUps": {
+      "ifTooAbstract": ["哪些信息必须结构化保存而不是摘要？"],
+      "ifMissingProduction": ["如何验证摘要没有丢关键事实？"],
+      "ifStrongAnswer": ["如何处理不同用户之间的记忆隔离？"]
+    },
+    "sourceTags": ["context-window", "state", "checkpoint"]
+  },
+  {
+    "id": "prod_001",
+    "competencyId": "production_observability",
+    "rubricId": "rubric_production_observability",
+    "difficulty": "mid",
+    "type": "debugging",
+    "question": "用户反馈 AI 回答答非所问，你会按什么顺序排查？",
+    "intent": "考察线上问题排查链路。",
+    "expectedSignals": ["复现样本", "prompt/model 版本", "retrieved chunks", "工具调用", "trace 和回归测试"],
+    "redFlags": ["直接换模型", "不看检索结果", "没有日志和复现"],
+    "followUps": {
+      "ifTooAbstract": ["请按前端、API、RAG、LLM、工具五层排查。"],
+      "ifMissingProduction": ["你需要提前记录哪些日志才能排查？"],
+      "ifStrongAnswer": ["如何把这个 bad case 加入 eval？"]
+    },
+    "sourceTags": ["observability", "debugging", "evals"]
+  },
+  {
+    "id": "prod_002",
+    "competencyId": "production_observability",
+    "rubricId": "rubric_production_observability",
+    "difficulty": "senior",
+    "type": "system-design",
+    "question": "请设计一个 AI 应用上线后的质量、成本、延迟和安全监控体系。",
+    "intent": "考察可观测性和治理体系。",
+    "expectedSignals": ["质量指标", "token 成本", "latency breakdown", "安全事件", "dashboard 和报警"],
+    "redFlags": ["只监控接口错误率", "没有成本统计", "没有质量回归"],
+    "followUps": {
+      "ifTooAbstract": ["请列出至少 8 个你会记录的 trace 字段。"],
+      "ifMissingProduction": ["如何设置灰度发布和回滚门槛？"],
+      "ifStrongAnswer": ["如何区分模型升级和知识库更新导致的质量变化？"]
+    },
+    "sourceTags": ["observability", "cost", "latency", "safety"]
+  },
+  {
+    "id": "prod_003",
+    "competencyId": "production_observability",
+    "rubricId": "rubric_production_observability",
+    "difficulty": "mid",
+    "type": "tradeoff",
+    "question": "AI 应用成本持续上升，你会从哪些环节优化，并如何验证没有损伤质量？",
+    "intent": "考察成本治理与质量回归。",
+    "expectedSignals": ["token 统计", "缓存", "小模型路由", "batch embedding", "质量回归 eval"],
+    "redFlags": ["只限制用户使用", "不看 token 来源", "不验证质量"],
+    "followUps": {
+      "ifTooAbstract": ["prompt、RAG、模型、缓存分别怎么优化？"],
+      "ifMissingProduction": ["缓存有哪些权限和新鲜度风险？"],
+      "ifStrongAnswer": ["如何做 per-tenant 成本统计？"]
+    },
+    "sourceTags": ["cost", "caching", "model-routing"]
+  },
+  {
+    "id": "safety_001",
+    "competencyId": "ai_safety_governance",
+    "rubricId": "rubric_ai_safety_governance",
+    "difficulty": "mid",
+    "type": "concept",
+    "question": "什么是直接 prompt injection 和间接 prompt injection？RAG 场景为什么更危险？",
+    "intent": "考察 AI 安全基本概念和 RAG 注入风险。",
+    "expectedSignals": ["直接注入", "间接注入", "不可信文档", "指令隔离", "工具越权风险"],
+    "redFlags": ["不知道间接注入", "认为过滤关键词足够", "把文档内容当可信指令"],
+    "followUps": {
+      "ifTooAbstract": ["请举一个文档里的恶意指令例子。"],
+      "ifMissingProduction": ["Agent 应该如何区分内容和指令？"],
+      "ifStrongAnswer": ["如何设计红队用例验证防护？"]
+    },
+    "sourceTags": ["owasp-llm", "prompt-injection", "rag-security"]
+  },
+  {
+    "id": "safety_002",
+    "competencyId": "ai_safety_governance",
+    "rubricId": "rubric_ai_safety_governance",
+    "difficulty": "senior",
+    "type": "scenario",
+    "question": "如果候选人上传的简历或网页内容诱导 Agent 泄露 API key 或调用高风险工具，你会如何防护？",
+    "intent": "考察上传文件、RAG 注入和工具权限治理。",
+    "expectedSignals": ["不可信输入", "敏感信息隔离", "工具最小权限", "人工确认", "审计和拒答"],
+    "redFlags": ["让模型自行判断是否安全", "工具拥有全量权限", "不处理上传文件恶意内容"],
+    "followUps": {
+      "ifTooAbstract": ["哪些数据永远不应该进入模型上下文？"],
+      "ifMissingProduction": ["如何防止工具越权读取其它用户数据？"],
+      "ifStrongAnswer": ["如何设计安全审计日志和报警？"]
+    },
+    "sourceTags": ["data-security", "tool-permissions", "prompt-injection"]
+  },
+  {
+    "id": "safety_003",
+    "competencyId": "ai_safety_governance",
+    "rubricId": "rubric_ai_safety_governance",
+    "difficulty": "mid",
+    "type": "system-design",
+    "question": "一个企业级 AI 面试官 Agent 应该如何处理候选人简历、面试回答和评分报告的隐私与合规？",
+    "intent": "考察数据隐私、权限、留存和删除。",
+    "expectedSignals": ["数据最小化", "访问权限", "PII 脱敏", "留存周期", "删除和审计"],
+    "redFlags": ["长期保存所有原文", "不区分管理员和面试官权限", "无删除机制"],
+    "followUps": {
+      "ifTooAbstract": ["哪些字段需要脱敏？"],
+      "ifMissingProduction": ["候选人要求删除数据，你的系统怎么做？"],
+      "ifStrongAnswer": ["如何让评分报告可审计但不泄露敏感信息？"]
+    },
+    "sourceTags": ["privacy", "compliance", "audit"]
+  },
+  {
+    "id": "frontend_001",
+    "competencyId": "ai_frontend_experience",
+    "rubricId": "rubric_ai_frontend_experience",
+    "difficulty": "mid",
+    "type": "implementation",
+    "question": "AI 对话为什么常用 streaming？请比较 SSE、NDJSON 和 WebSocket 在面试官 Agent 里的适用场景。",
+    "intent": "考察 AI 前端流式协议和用户体验。",
+    "expectedSignals": ["首 token 延迟", "SSE/NDJSON/WebSocket 差异", "取消和重试", "部分结果", "状态一致性"],
+    "redFlags": ["只会同步请求", "不处理取消", "不了解协议差异"],
+    "followUps": {
+      "ifTooAbstract": ["当前面试消息接口如果用 NDJSON，你前端怎么解析？"],
+      "ifMissingProduction": ["网络断开时如何恢复 session？"],
+      "ifStrongAnswer": ["什么时候 WebSocket 比 SSE 更合适？"]
+    },
+    "sourceTags": ["streaming-ui", "sse", "ndjson"]
+  },
+  {
+    "id": "frontend_002",
+    "competencyId": "ai_frontend_experience",
+    "rubricId": "rubric_ai_frontend_experience",
+    "difficulty": "mid",
+    "type": "scenario",
+    "question": "面试官 Agent 输出问题、即时评分和最终报告，前端应该如何设计状态和错误恢复？",
+    "intent": "考察 AI 产品前端状态管理。",
+    "expectedSignals": ["session 状态", "loading 和 disabled", "partial events", "错误重试", "报告持久化"],
+    "redFlags": ["刷新丢失进度", "重复提交回答", "错误后无法恢复"],
+    "followUps": {
+      "ifTooAbstract": ["请列出前端状态机的几个关键状态。"],
+      "ifMissingProduction": ["重复点击提交如何保证幂等？"],
+      "ifStrongAnswer": ["如何展示评分证据而不让候选人误解？"]
+    },
+    "sourceTags": ["frontend-state", "ux", "interview-agent"]
+  },
+  {
+    "id": "frontend_003",
+    "competencyId": "ai_frontend_experience",
+    "rubricId": "rubric_ai_frontend_experience",
+    "difficulty": "senior",
+    "type": "product",
+    "question": "如何让 AI 面试过程对候选人透明、低焦虑且可解释，同时不泄露评分规则细节？",
+    "intent": "考察 AI UX、透明度和反作弊边界。",
+    "expectedSignals": ["进度展示", "问题意图适度透明", "评分反馈边界", "异常提示", "公平性和一致性"],
+    "redFlags": ["完全黑盒", "暴露完整答案模板", "错误提示不友好"],
+    "followUps": {
+      "ifTooAbstract": ["哪些信息可以展示，哪些不应该展示？"],
+      "ifMissingProduction": ["如果模型超时，候选人应该看到什么？"],
+      "ifStrongAnswer": ["如何设计申诉或人工复核入口？"]
+    },
+    "sourceTags": ["ux", "explainability", "fairness"]
+  },
+  {
+    "id": "system_001",
+    "competencyId": "system_product_design",
+    "rubricId": "rubric_system_product_design",
+    "difficulty": "senior",
+    "type": "system-design",
+    "question": "请设计一个企业级 AI 面试官 Agent，覆盖简历上传、自我介绍、动态提问、评分和报告。",
+    "intent": "综合考察系统架构和产品边界。",
+    "expectedSignals": ["前端/API/Agent/RAG 分层", "结构化题库和 rubric", "session/message/score/report 表", "文件解析和对象存储", "评估、监控、安全和权限"],
+    "redFlags": ["只有聊天接口", "没有结构化题库", "没有评分校准和审计"],
+    "followUps": {
+      "ifTooAbstract": ["请画出数据流或说出核心表结构。"],
+      "ifMissingProduction": ["多租户企业数据权限怎么处理？"],
+      "ifStrongAnswer": ["如何支持后续新增 Java 工程师或产品经理岗位？"]
+    },
+    "sourceTags": ["system-design", "interview-agent", "enterprise"]
+  },
+  {
+    "id": "system_002",
+    "competencyId": "system_product_design",
+    "rubricId": "rubric_system_product_design",
+    "difficulty": "mid",
+    "type": "product",
+    "question": "接到“做一个 AI 面试官 Agent”的需求，你会先向业务方澄清哪些问题？",
+    "intent": "考察业务理解和 MVP 边界。",
+    "expectedSignals": ["目标岗位和 level", "通过标准", "题库来源", "人工复核", "成功指标和风险"],
+    "redFlags": ["直接开始写代码", "不问评分标准", "不问风险和人工兜底"],
+    "followUps": {
+      "ifTooAbstract": ["请给出你会问业务方的 8 个问题。"],
+      "ifMissingProduction": ["如何判断第一版 MVP 可以上线？"],
+      "ifStrongAnswer": ["如何把面试反馈用于题库迭代？"]
+    },
+    "sourceTags": ["product", "mvp", "business-metrics"]
+  },
+  {
+    "id": "system_003",
+    "competencyId": "system_product_design",
+    "rubricId": "rubric_system_product_design",
+    "difficulty": "senior",
+    "type": "tradeoff",
+    "question": "题库应该放在 markdown、JSON 文件、Postgres 表还是 CMS？你会如何设计版本和审核流程？",
+    "intent": "考察题库资产治理和可扩展性。",
+    "expectedSignals": ["结构化题库", "版本号和审核状态", "知识库和题库分离", "迁移和发布", "校准样本"],
+    "redFlags": ["题库只是一个大 prompt", "没有审核和版本", "不能扩展多岗位"],
+    "followUps": {
+      "ifTooAbstract": ["哪些数据适合向量库，哪些适合结构化表？"],
+      "ifMissingProduction": ["如何回滚一次错误题库发布？"],
+      "ifStrongAnswer": ["如何用历史面试数据校准题库难度？"]
+    },
+    "sourceTags": ["question-bank", "governance", "versioning"]
+  }
+]

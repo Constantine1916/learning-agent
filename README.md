@@ -93,19 +93,33 @@ OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 EMBEDDING_DIMENSIONS=1536
 ```
 
-## 题库
+## 企业级面试题库
 
-默认题库在：
+AI 应用开发工程师的第一版企业级题库资产包在：
 
 ```bash
-content/knowledge/ai-application-engineer.md
+content/interview-bank/ai-application-engineer/
 ```
 
-更新题库后执行：
+目录结构：
+
+```bash
+role.json                 # 岗位定义、轮次、通过线、选题策略
+competencies.json         # 能力模型和权重
+questions.json            # 结构化主问题、追问策略、期望信号
+rubrics.json              # 企业级评分 rubric
+calibration-samples.json  # 高/中/低分校准样本
+sources.json              # 公开资料来源和使用说明
+knowledge.md              # RAG 参考知识库
+```
+
+更新 `knowledge.md` 后执行：
 
 ```bash
 npm run ingest:knowledge
 ```
+
+结构化题库 JSON 会在面试流程中由 `lib/interview-bank` 直接读取；`knowledge.md` 会被切成 `knowledge_chunks` 并写入 pgvector，作为 Agent 出题和评分时的 RAG 背景知识。
 
 ## API
 

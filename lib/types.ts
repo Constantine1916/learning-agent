@@ -33,9 +33,23 @@ export const candidateProfileSchema = z.object({
 
 export const questionSchema = z.object({
   id: z.string(),
+  competencyId: z.string().optional(),
   competency: z.string(),
+  difficulty: z.string().optional(),
+  type: z.string().optional(),
+  rubricId: z.string().optional(),
   question: z.string(),
+  intent: z.string().optional(),
   expectedSignals: z.array(z.string()),
+  redFlags: z.array(z.string()).optional(),
+  followUps: z
+    .object({
+      ifTooAbstract: z.array(z.string()).optional(),
+      ifMissingProduction: z.array(z.string()).optional(),
+      ifStrongAnswer: z.array(z.string()).optional(),
+    })
+    .optional(),
+  sourceTags: z.array(z.string()).optional(),
   sourceIds: z.array(z.string()),
 })
 

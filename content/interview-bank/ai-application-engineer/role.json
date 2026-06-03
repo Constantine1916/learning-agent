@@ -1,0 +1,52 @@
+{
+  "id": "ai-application-engineer",
+  "title": "AI 应用开发工程师",
+  "version": "2026.06.enterprise-seed",
+  "targetLevels": ["mid", "senior"],
+  "passingScore": 80,
+  "targetRounds": 6,
+  "positioning": "面向能把 LLM、RAG、Agent、评估、安全和 Web 工程落地到真实业务场景的 AI 应用工程师。",
+  "interviewStages": [
+    {
+      "id": "resume_grounding",
+      "name": "简历与自我介绍校验",
+      "goal": "确认候选人真实项目、职责边界、AI 应用深度和可追问线索。"
+    },
+    {
+      "id": "core_engineering",
+      "name": "核心工程能力",
+      "goal": "覆盖 LLM API、Prompt、RAG、Agent workflow、结构化输出和系统设计。"
+    },
+    {
+      "id": "production_readiness",
+      "name": "生产化与风险控制",
+      "goal": "考察评估、监控、成本、延迟、安全、权限和灰度回滚。"
+    },
+    {
+      "id": "final_judgement",
+      "name": "综合评分与学习建议",
+      "goal": "按能力项权重汇总得分，输出通过状态、优势、短板和补强路径。"
+    }
+  ],
+  "selectionPolicy": {
+    "rounds": 6,
+    "mustCoverCompetencyIds": [
+      "rag_data_governance",
+      "vector_retrieval",
+      "agent_tool_workflow",
+      "production_observability"
+    ],
+    "adaptiveSignals": [
+      "简历中出现 RAG、向量库、Agent、LangGraph、LLM eval、tool calling 时提高对应能力项优先级。",
+      "回答偏抽象时优先追问真实项目、指标、上线问题和个人职责。",
+      "回答高质量时进入更高难度追问，要求做方案权衡或故障排查。",
+      "回答缺少安全、权限、成本或评估时补问生产化风险。"
+    ]
+  },
+  "scorePolicy": {
+    "scoreRange": [0, 100],
+    "passingScore": 80,
+    "singleQuestionPassingScore": 80,
+    "calibrationRule": "90 分以上需要有真实工程案例、明确取舍、上线指标和风险处理；70-79 分说明理解基本正确但工程闭环不足；60 分以下通常为概念堆砌或关键风险缺失。"
+  }
+}

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "llm_api_engineering",
+    "name": "LLM API 工程",
+    "category": "core",
+    "weight": 8,
+    "description": "模型选择、OpenAI-compatible API 适配、流式输出、重试、超时、限流、模型路由和供应商迁移。",
+    "expectedMidLevel": "能独立接入 LLM API，处理 streaming、JSON 输出、错误重试和基础成本控制。",
+    "expectedSeniorLevel": "能设计跨供应商适配层、模型路由、灰度升级、SLA 降级和调用观测体系。",
+    "sourceTags": ["openai-api", "model-selection", "streaming", "provider-adapter"]
+  },
+  {
+    "id": "prompt_context_engineering",
+    "name": "Prompt 与上下文工程",
+    "category": "core",
+    "weight": 8,
+    "description": "指令层级、输出格式、few-shot、上下文排序、裁剪、压缩、版本管理和 prompt injection 防护。",
+    "expectedMidLevel": "能写出稳定 prompt，并结合 schema 校验和上下文控制保证输出质量。",
+    "expectedSeniorLevel": "能建立 prompt 版本评估、A/B、上下文治理和注入防护机制。",
+    "sourceTags": ["prompt-engineering", "context-window", "structured-output", "prompt-injection"]
+  },
+  {
+    "id": "structured_outputs",
+    "name": "结构化输出与工具协议",
+    "category": "core",
+    "weight": 7,
+    "description": "JSON schema、函数调用、类型校验、错误恢复、业务事务、审计日志和可恢复失败。",
+    "expectedMidLevel": "能让 LLM 稳定输出后端可用 JSON，并做 Zod/Pydantic 校验。",
+    "expectedSeniorLevel": "能把结构化输出、工具调用、业务事务和人工审核组合成可靠协议。",
+    "sourceTags": ["json-schema", "tool-calling", "validation", "retries"]
+  },
+  {
+    "id": "rag_data_governance",
+    "name": "RAG 数据治理",
+    "category": "rag",
+    "weight": 11,
+    "description": "文档解析、清洗、去重、chunking、metadata、权限、版本、增量更新和删除回滚。",
+    "expectedMidLevel": "能设计基础文档 ingestion、chunking、metadata 和增量索引。",
+    "expectedSeniorLevel": "能处理多数据源、权限隔离、版本治理、质量校验和索引回滚。",
+    "sourceTags": ["rag", "chunking", "metadata", "document-governance"]
+  },
+  {
+    "id": "vector_retrieval",
+    "name": "Embedding 与检索优化",
+    "category": "rag",
+    "weight": 11,
+    "description": "embedding 模型、向量维度、pgvector、相似度、HNSW、hybrid search、query rewrite、rerank 和上下文压缩。",
+    "expectedMidLevel": "能解释 embedding、向量检索、topK、metadata filter 和基本 rerank。",
+    "expectedSeniorLevel": "能系统优化召回、排序、延迟、成本，并设计跨模型迁移和评估实验。",
+    "sourceTags": ["embedding", "pgvector", "hybrid-search", "rerank"]
+  },
+  {
+    "id": "rag_generation_evaluation",
+    "name": "RAG 生成控制与评估",
+    "category": "rag",
+    "weight": 10,
+    "description": "引用、拒答、groundedness、冲突处理、golden set、recall@k、faithfulness、LLM judge 和线上反馈闭环。",
+    "expectedMidLevel": "能设计引用、拒答和基础离线评估。",
+    "expectedSeniorLevel": "能建立完整 RAG eval、线上反馈、回归测试和质量看板。",
+    "sourceTags": ["rag-evaluation", "groundedness", "citations", "evals"]
+  },
+  {
+    "id": "agent_tool_workflow",
+    "name": "Agent 工具调用与工作流",
+    "category": "agent",
+    "weight": 11,
+    "description": "tool calling、工具 schema、权限、幂等、重试、人工确认、LangGraph 状态节点和多步骤任务编排。",
+    "expectedMidLevel": "能设计工具调用 schema 和基础多轮流程。",
+    "expectedSeniorLevel": "能设计可恢复、可观测、可中断、有权限边界的 Agent workflow。",
+    "sourceTags": ["agent", "tool-calling", "langgraph", "workflow"]
+  },
+  {
+    "id": "agent_state_memory",
+    "name": "Agent 状态与记忆",
+    "category": "agent",
+    "weight": 7,
+    "description": "session state、message history、summary memory、profile memory、checkpoint、长期记忆、隐私和删除。",
+    "expectedMidLevel": "能维护多轮对话状态，避免重复问题并支持恢复。",
+    "expectedSeniorLevel": "能区分短期状态、长期记忆和外部知识，并处理隐私、安全和生命周期。",
+    "sourceTags": ["agent-memory", "state", "checkpoint", "privacy"]
+  },
+  {
+    "id": "production_observability",
+    "name": "生产化与可观测性",
+    "category": "production",
+    "weight": 9,
+    "description": "trace、日志、指标、模型版本、prompt 版本、token 成本、延迟、缓存、灰度、回滚和报警。",
+    "expectedMidLevel": "能排查常见线上质量问题，记录必要日志和指标。",
+    "expectedSeniorLevel": "能建立 AI 应用可观测平台、评估回归、灰度发布和成本治理。",
+    "sourceTags": ["observability", "evals", "cost", "latency", "rollback"]
+  },
+  {
+    "id": "ai_safety_governance",
+    "name": "AI 安全与权限治理",
+    "category": "risk",
+    "weight": 8,
+    "description": "prompt injection、间接注入、敏感信息、工具越权、数据权限、沙箱、审计和红队测试。",
+    "expectedMidLevel": "能识别常见注入和敏感信息风险，设计基础防护。",
+    "expectedSeniorLevel": "能建立输入、检索、工具、输出和审计全链路风险治理。",
+    "sourceTags": ["owasp-llm", "prompt-injection", "permissions", "data-security"]
+  },
+  {
+    "id": "ai_frontend_experience",
+    "name": "AI 前端与交互体验",
+    "category": "product-engineering",
+    "weight": 5,
+    "description": "SSE/NDJSON/WebSocket、取消生成、重试、加载状态、引用展示、错误恢复和状态一致性。",
+    "expectedMidLevel": "能实现稳定流式对话、错误提示和基础状态同步。",
+    "expectedSeniorLevel": "能设计复杂 Agent 前端体验、可解释反馈、恢复机制和用户信任设计。",
+    "sourceTags": ["streaming-ui", "sse", "frontend", "ux"]
+  },
+  {
+    "id": "system_product_design",
+    "name": "系统设计与产品判断",
+    "category": "architecture",
+    "weight": 5,
+    "description": "前后端、API、Agent workflow、RAG、数据库、队列、对象存储、部署、MVP 边界、人工兜底和业务指标。",
+    "expectedMidLevel": "能拆分 AI 应用主要模块，完成可运行系统设计。",
+    "expectedSeniorLevel": "能结合业务目标、风险、成本和组织流程设计企业级 AI 应用架构。",
+    "sourceTags": ["system-design", "product", "architecture", "business-metrics"]
+  }
+]

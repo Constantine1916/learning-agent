@@ -1,0 +1,518 @@
+[
+  {
+    "id": "rubric_llm_api_engineering",
+    "competencyId": "llm_api_engineering",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "模型选择与任务匹配",
+        "weight": 20,
+        "excellent": "能结合质量、延迟、成本、上下文、结构化能力、中文效果和工具调用能力选择模型。",
+        "acceptable": "能说明模型能力和成本延迟的基本权衡。",
+        "weak": "只说选择最强或最便宜的模型，没有任务匹配逻辑。"
+      },
+      {
+        "label": "API 适配与供应商迁移",
+        "weight": 20,
+        "excellent": "能抽象 provider、baseURL、model、timeout、retry、streaming、response schema 和灰度配置。",
+        "acceptable": "能封装基础 API 调用和环境变量配置。",
+        "weak": "业务代码直接散落调用 SDK，难以切换供应商。"
+      },
+      {
+        "label": "可靠性与降级",
+        "weight": 20,
+        "excellent": "能设计超时、重试、限流、熔断、fallback、小模型降级和用户可恢复错误。",
+        "acceptable": "能处理常见错误和重试。",
+        "weak": "缺少失败处理，模型不可用时业务直接中断。"
+      },
+      {
+        "label": "流式与结构化响应",
+        "weight": 20,
+        "excellent": "能同时处理 streaming UX、结构化输出校验、partial 状态和最终一致性。",
+        "acceptable": "能实现基础 streaming 或 JSON 输出。",
+        "weak": "只返回整段文本，不能稳定接入业务流程。"
+      },
+      {
+        "label": "成本与观测",
+        "weight": 20,
+        "excellent": "能记录 token、延迟、错误、模型版本和成本，并用于模型路由和容量规划。",
+        "acceptable": "知道需要监控成本和延迟。",
+        "weak": "没有 token 成本和调用质量意识。"
+      }
+    ],
+    "redFlags": ["把模型选择等同于排行榜最高分", "没有超时重试和错误处理", "不知道 OpenAI-compatible API 适配层的价值"]
+  },
+  {
+    "id": "rubric_prompt_context_engineering",
+    "competencyId": "prompt_context_engineering",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "指令层级与边界",
+        "weight": 20,
+        "excellent": "能清楚区分 system、developer、user、工具结果和检索内容的可信边界。",
+        "acceptable": "能说明系统提示和用户提示的基本差异。",
+        "weak": "把所有提示词混在一起，忽略权限和优先级。"
+      },
+      {
+        "label": "输出格式与错误恢复",
+        "weight": 20,
+        "excellent": "能结合 schema、示例、response format、校验、重试修复和默认兜底稳定输出。",
+        "acceptable": "能要求模型输出 JSON 并做基础校验。",
+        "weak": "只靠自然语言要求输出格式，没有后端校验。"
+      },
+      {
+        "label": "上下文组织",
+        "weight": 20,
+        "excellent": "能按相关性、时效、权限、摘要和优先级组织上下文，处理窗口不足。",
+        "acceptable": "知道要裁剪和摘要长上下文。",
+        "weak": "把所有历史和文档无差别塞进 prompt。"
+      },
+      {
+        "label": "版本评估",
+        "weight": 20,
+        "excellent": "能用 golden set、A/B、回归测试和线上指标验证 prompt 改动。",
+        "acceptable": "知道 prompt 需要测试和版本记录。",
+        "weak": "靠人工感觉判断 prompt 好坏。"
+      },
+      {
+        "label": "安全防护",
+        "weight": 20,
+        "excellent": "能识别 prompt injection、上下文越权和不可信内容，并设计隔离策略。",
+        "acceptable": "能提到注入风险和基础过滤。",
+        "weak": "认为 prompt 写得强就能防止所有攻击。"
+      }
+    ],
+    "redFlags": ["没有 schema 校验意识", "不知道间接 prompt injection", "把 prompt 优化等同于调文案"]
+  },
+  {
+    "id": "rubric_structured_outputs",
+    "competencyId": "structured_outputs",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "Schema-first 设计",
+        "weight": 20,
+        "excellent": "能先定义业务 schema、必填字段、枚举、范围和嵌套结构，再约束模型输出。",
+        "acceptable": "能定义基本 JSON 字段。",
+        "weak": "事后从自然语言里用正则提取关键字段。"
+      },
+      {
+        "label": "类型校验与恢复",
+        "weight": 20,
+        "excellent": "能用 Zod/Pydantic 校验、错误修复重试、字段补全和安全默认值。",
+        "acceptable": "能做 JSON parse 和部分字段检查。",
+        "weak": "模型返回什么就直接入库或执行。"
+      },
+      {
+        "label": "工具协议",
+        "weight": 20,
+        "excellent": "能把结构化输出和 tool schema、参数校验、权限、幂等和审计连接起来。",
+        "acceptable": "知道 tool calling 需要 schema。",
+        "weak": "把工具调用当成普通文本指令。"
+      },
+      {
+        "label": "业务事务",
+        "weight": 20,
+        "excellent": "能处理模型输出与数据库事务、外部副作用、人工确认和补偿流程。",
+        "acceptable": "能避免明显错误写库。",
+        "weak": "不考虑模型输出导致的业务副作用。"
+      },
+      {
+        "label": "异常与安全",
+        "weight": 20,
+        "excellent": "能记录脏输出、越界值、注入内容和审计证据，并设计可恢复错误。",
+        "acceptable": "能返回错误提示。",
+        "weak": "解析失败直接崩溃或吞掉错误。"
+      }
+    ],
+    "redFlags": ["直接 eval 模型输出", "没有字段范围校验", "模型输出直接触发高风险动作"]
+  },
+  {
+    "id": "rubric_rag_data_governance",
+    "competencyId": "rag_data_governance",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "数据源解析",
+        "weight": 20,
+        "excellent": "能覆盖 PDF、DOCX、网页、表格、图片 OCR、编码、空文件和解析失败兜底。",
+        "acceptable": "能处理常见文档格式和失败提示。",
+        "weak": "假设所有文档都是干净纯文本。"
+      },
+      {
+        "label": "清洗与去重",
+        "weight": 20,
+        "excellent": "能处理模板噪声、页眉页脚、重复段落、过期版本和低质量内容。",
+        "acceptable": "能做基础文本清理。",
+        "weak": "原文不治理直接 embedding。"
+      },
+      {
+        "label": "Chunking 策略",
+        "weight": 20,
+        "excellent": "能结合标题层级、语义边界、chunk size、overlap、表格和代码块设计切分。",
+        "acceptable": "知道 chunk size 和 overlap 的基本影响。",
+        "weak": "按固定字符数粗暴切分且不评估。"
+      },
+      {
+        "label": "Metadata 与权限",
+        "weight": 20,
+        "excellent": "能设计 source id、doc id、版本、owner、更新时间、权限标签和业务分类。",
+        "acceptable": "能保存 source 和标题。",
+        "weak": "没有来源和权限 metadata。"
+      },
+      {
+        "label": "增量更新与回滚",
+        "weight": 20,
+        "excellent": "能处理新增、更新、删除、权限变化、索引重建、版本回滚和数据质量检查。",
+        "acceptable": "知道更新文档要重新 embedding。",
+        "weak": "只能全量重建，且无法处理删除和权限变化。"
+      }
+    ],
+    "redFlags": ["把 RAG 等同于上传文件到向量库", "忽略文档权限", "不知道文档更新删除会影响索引"]
+  },
+  {
+    "id": "rubric_vector_retrieval",
+    "competencyId": "vector_retrieval",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "Embedding 理解",
+        "weight": 20,
+        "excellent": "能解释模型、语言适配、维度、归一化、相似度和跨模型不可混用。",
+        "acceptable": "知道 embedding 用于语义相似度。",
+        "weak": "不知道向量维度和模型切换的影响。"
+      },
+      {
+        "label": "向量库与索引",
+        "weight": 20,
+        "excellent": "能比较 pgvector、HNSW、IVFFlat、精确搜索、索引参数和召回延迟。",
+        "acceptable": "能使用向量数据库做 topK 检索。",
+        "weak": "只知道调用相似度接口。"
+      },
+      {
+        "label": "混合检索",
+        "weight": 20,
+        "excellent": "能设计 BM25、向量召回、metadata filter、query rewrite、multi-query 和融合排序。",
+        "acceptable": "知道 hybrid search 能提升稳定性。",
+        "weak": "只会调 topK，无法解决短 query 或关键词问题。"
+      },
+      {
+        "label": "Rerank 与上下文选择",
+        "weight": 20,
+        "excellent": "能使用 rerank、MMR、去重、上下文压缩和引用排序控制输入质量。",
+        "acceptable": "知道 rerank 用于重排候选 chunk。",
+        "weak": "把召回的所有内容直接塞给模型。"
+      },
+      {
+        "label": "检索评估",
+        "weight": 20,
+        "excellent": "能用 recall@k、MRR、NDCG、命中率、延迟和坏例分析评估检索。",
+        "acceptable": "知道要用测试集评估检索。",
+        "weak": "只凭 demo 感觉判断检索好坏。"
+      }
+    ],
+    "redFlags": ["混用不同 embedding 模型生成的向量", "不了解 metadata filter", "没有检索评估意识"]
+  },
+  {
+    "id": "rubric_rag_generation_evaluation",
+    "competencyId": "rag_generation_evaluation",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "生成约束",
+        "weight": 20,
+        "excellent": "能要求答案基于证据、引用 source id、处理冲突和低置信度拒答。",
+        "acceptable": "知道需要引用来源和减少幻觉。",
+        "weak": "检索后让模型自由发挥。"
+      },
+      {
+        "label": "Groundedness",
+        "weight": 20,
+        "excellent": "能做答案片段与证据对齐、faithfulness 评估和不支持内容检测。",
+        "acceptable": "知道答案要被上下文支持。",
+        "weak": "把回答流畅度当作正确性。"
+      },
+      {
+        "label": "离线评估",
+        "weight": 20,
+        "excellent": "能构建 golden set、bad case、自动 eval、LLM judge 校准和回归测试。",
+        "acceptable": "能准备测试问题集。",
+        "weak": "只有人工随便问几个问题。"
+      },
+      {
+        "label": "线上反馈",
+        "weight": 20,
+        "excellent": "能采集用户反馈、无答案率、引用点击、满意度和问题回流。",
+        "acceptable": "知道要监控用户反馈。",
+        "weak": "上线后没有质量闭环。"
+      },
+      {
+        "label": "发布门槛",
+        "weight": 20,
+        "excellent": "能定义质量、安全、延迟、成本、灰度和回滚准入标准。",
+        "acceptable": "能说明上线前要验收。",
+        "weak": "demo 能跑就认为可以上线。"
+      }
+    ],
+    "redFlags": ["不知道 recall@k 或 faithfulness", "完全依赖 LLM judge 且不校准", "没有拒答策略"]
+  },
+  {
+    "id": "rubric_agent_tool_workflow",
+    "competencyId": "agent_tool_workflow",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "工具边界",
+        "weight": 20,
+        "excellent": "能判断何时调用工具、何时直接回答，并设计工具职责边界。",
+        "acceptable": "知道实时数据和外部操作需要工具。",
+        "weak": "什么任务都交给模型自由决定。"
+      },
+      {
+        "label": "工具 Schema 与校验",
+        "weight": 20,
+        "excellent": "能设计参数类型、枚举、必填字段、权限上下文和结果校验。",
+        "acceptable": "能定义基础 tool schema。",
+        "weak": "工具参数是自由文本，缺少校验。"
+      },
+      {
+        "label": "权限与高风险动作",
+        "weight": 20,
+        "excellent": "能使用最小权限、沙箱、人工确认、审计和敏感数据隔离。",
+        "acceptable": "知道高风险动作需要确认。",
+        "weak": "Agent 可直接执行删除、发送、支付等动作。"
+      },
+      {
+        "label": "工作流编排",
+        "weight": 20,
+        "excellent": "能用状态图、节点、条件路由、checkpoint、重试和终止条件编排多步骤任务。",
+        "acceptable": "能实现线性多步 chain。",
+        "weak": "没有状态管理，靠 prompt 记住流程。"
+      },
+      {
+        "label": "失败恢复与观测",
+        "weight": 20,
+        "excellent": "能处理工具失败、超时、脏数据、补偿、trace 和 replay。",
+        "acceptable": "能做基础重试和错误提示。",
+        "weak": "工具失败时 Agent 编造结果或流程中断。"
+      }
+    ],
+    "redFlags": ["缺少高风险动作确认", "没有幂等设计", "工具结果不校验就使用"]
+  },
+  {
+    "id": "rubric_agent_state_memory",
+    "competencyId": "agent_state_memory",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "状态建模",
+        "weight": 20,
+        "excellent": "能设计 session、messages、candidate profile、question plan、scores 和 status。",
+        "acceptable": "能保存基础消息历史。",
+        "weak": "只依赖模型上下文，不保存结构化状态。"
+      },
+      {
+        "label": "记忆分层",
+        "weight": 20,
+        "excellent": "能区分短期消息、摘要记忆、长期画像、外部知识库和工具结果。",
+        "acceptable": "知道需要摘要长对话。",
+        "weak": "把全部历史无限塞进上下文。"
+      },
+      {
+        "label": "恢复与去重",
+        "weight": 20,
+        "excellent": "能处理中断恢复、重复问题规避、checkpoint 和历史评分引用。",
+        "acceptable": "能避免明显重复提问。",
+        "weak": "多轮流程断线后无法恢复。"
+      },
+      {
+        "label": "隐私与生命周期",
+        "weight": 20,
+        "excellent": "能设计用户同意、敏感信息过滤、TTL、删除和权限隔离。",
+        "acceptable": "知道记忆涉及隐私。",
+        "weak": "长期保存所有对话且无删除机制。"
+      },
+      {
+        "label": "上下文选择",
+        "weight": 20,
+        "excellent": "能按相关性、时效和目标动态选择进入 prompt 的记忆。",
+        "acceptable": "能做基础历史摘要。",
+        "weak": "记忆检索和 prompt 组织没有策略。"
+      }
+    ],
+    "redFlags": ["不知道长期记忆隐私风险", "没有 session 状态", "重复问同类问题"]
+  },
+  {
+    "id": "rubric_production_observability",
+    "competencyId": "production_observability",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "Trace 与日志",
+        "weight": 20,
+        "excellent": "能记录 request id、session、prompt、模型版本、retrieved chunks、tool calls 和错误。",
+        "acceptable": "能记录基础请求日志。",
+        "weak": "线上问题无法复现和回放。"
+      },
+      {
+        "label": "质量监控",
+        "weight": 20,
+        "excellent": "能监控回答质量、拒答率、坏例、用户反馈、eval 回归和安全事件。",
+        "acceptable": "知道要监控用户满意度。",
+        "weak": "只监控接口是否 200。"
+      },
+      {
+        "label": "成本延迟",
+        "weight": 20,
+        "excellent": "能拆解模型、embedding、rerank、工具、缓存和前端流式延迟与成本。",
+        "acceptable": "知道 token 和延迟影响成本。",
+        "weak": "没有成本和 SLA 意识。"
+      },
+      {
+        "label": "发布与回滚",
+        "weight": 20,
+        "excellent": "能做 prompt/model/embedding 版本管理、灰度、A/B、回滚和变更审计。",
+        "acceptable": "知道上线前要测试。",
+        "weak": "直接全量发布模型和 prompt 改动。"
+      },
+      {
+        "label": "故障排查",
+        "weight": 20,
+        "excellent": "能按 prompt、RAG、模型参数、工具、缓存、安全和数据源逐层定位。",
+        "acceptable": "能从日志和输入开始排查。",
+        "weak": "只会换模型或重启服务。"
+      }
+    ],
+    "redFlags": ["没有 eval 回归", "无法回答线上坏例如何复现", "不知道 token 成本如何统计"]
+  },
+  {
+    "id": "rubric_ai_safety_governance",
+    "competencyId": "ai_safety_governance",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "威胁识别",
+        "weight": 20,
+        "excellent": "能识别直接注入、间接注入、RAG 污染、敏感信息泄露和越权工具调用。",
+        "acceptable": "知道 prompt injection 和敏感信息风险。",
+        "weak": "认为系统 prompt 足够强就安全。"
+      },
+      {
+        "label": "输入与检索隔离",
+        "weight": 20,
+        "excellent": "能把用户输入、检索内容和工具结果标记为不可信，并做指令隔离。",
+        "acceptable": "能过滤明显恶意输入。",
+        "weak": "把网页和文档内容当成可信指令。"
+      },
+      {
+        "label": "权限与工具安全",
+        "weight": 20,
+        "excellent": "能设计最小权限、审批、沙箱、幂等、审计和敏感字段屏蔽。",
+        "acceptable": "知道高风险工具需要权限控制。",
+        "weak": "Agent 可以越权读取或操作外部系统。"
+      },
+      {
+        "label": "输出与数据治理",
+        "weight": 20,
+        "excellent": "能做 PII 检测、脱敏、拒答、合规留存和用户数据删除。",
+        "acceptable": "知道敏感信息不能输出。",
+        "weak": "不区分公开信息和私密数据。"
+      },
+      {
+        "label": "红队与审计",
+        "weight": 20,
+        "excellent": "能设计红队样本、攻击回放、安全日志、报警和修复闭环。",
+        "acceptable": "知道上线前要做安全测试。",
+        "weak": "没有安全测试和事故复盘机制。"
+      }
+    ],
+    "redFlags": ["工具无权限边界", "不知道间接注入", "候选人建议把密钥交给模型判断"]
+  },
+  {
+    "id": "rubric_ai_frontend_experience",
+    "competencyId": "ai_frontend_experience",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "流式协议",
+        "weight": 20,
+        "excellent": "能比较 SSE、NDJSON、WebSocket，并根据交互复杂度选择。",
+        "acceptable": "能实现基础 streaming。",
+        "weak": "只会同步等待完整结果。"
+      },
+      {
+        "label": "交互状态",
+        "weight": 20,
+        "excellent": "能处理 loading、partial response、取消、重试、禁用状态和最终一致性。",
+        "acceptable": "能显示加载和错误。",
+        "weak": "用户不知道系统当前在做什么。"
+      },
+      {
+        "label": "可解释反馈",
+        "weight": 20,
+        "excellent": "能展示引用、评分依据、问题来源、置信度和可操作建议。",
+        "acceptable": "能展示基础结果和错误。",
+        "weak": "只展示模型文本，无法建立用户信任。"
+      },
+      {
+        "label": "错误恢复",
+        "weight": 20,
+        "excellent": "能处理网络中断、超时、重复提交、幂等和 session 恢复。",
+        "acceptable": "能手动重试。",
+        "weak": "失败后用户只能刷新重来。"
+      },
+      {
+        "label": "产品体验",
+        "weight": 20,
+        "excellent": "能让复杂 Agent 流程可控、可暂停、可解释、低焦虑。",
+        "acceptable": "能完成基本对话流程。",
+        "weak": "AI 功能像黑盒，用户无法判断进度和质量。"
+      }
+    ],
+    "redFlags": ["无取消机制", "重复提交导致状态错乱", "不展示引用或评分依据"]
+  },
+  {
+    "id": "rubric_system_product_design",
+    "competencyId": "system_product_design",
+    "difficulty": "mid_senior",
+    "dimensions": [
+      {
+        "label": "架构拆分",
+        "weight": 20,
+        "excellent": "能拆分 UI、API、Agent workflow、RAG、数据层、对象存储、队列和观测系统。",
+        "acceptable": "能说明前后端和模型服务主要模块。",
+        "weak": "系统设计只有一个聊天接口。"
+      },
+      {
+        "label": "数据建模",
+        "weight": 20,
+        "excellent": "能设计 role、competency、question、rubric、knowledge、session、message、score 和 report。",
+        "acceptable": "能设计基础会话和消息表。",
+        "weak": "没有结构化题库和评分数据。"
+      },
+      {
+        "label": "业务边界",
+        "weight": 20,
+        "excellent": "能澄清用户、场景、成功指标、风险、人工兜底和 MVP 范围。",
+        "acceptable": "知道要先明确需求。",
+        "weak": "只从技术出发，不问业务目标。"
+      },
+      {
+        "label": "扩展与部署",
+        "weight": 20,
+        "excellent": "能说明多角色、多租户、权限、部署、容量、缓存、异步任务和迁移。",
+        "acceptable": "能部署单角色系统。",
+        "weak": "只能本地 demo。"
+      },
+      {
+        "label": "治理闭环",
+        "weight": 20,
+        "excellent": "能把面试反馈、候选人表现、题库版本和评分校准纳入持续迭代。",
+        "acceptable": "知道要人工审核题库。",
+        "weak": "题库一次生成后不再维护。"
+      }
+    ],
+    "redFlags": ["没有题库版本概念", "不考虑人工兜底", "无法解释业务成功指标"]
+  }
+]

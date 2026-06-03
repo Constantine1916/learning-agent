@@ -1,0 +1,146 @@
+[
+  {
+    "id": "cal_rag_data_high_001",
+    "questionId": "rag_data_001",
+    "quality": "excellent",
+    "expectedScore": 92,
+    "answer": "我会先做数据源盘点，把 PDF、DOCX、网页、飞书文档分别接入解析器，保留 doc_id、source_url、owner、权限标签、版本和更新时间。解析后做页眉页脚、目录、重复段落和过期内容清洗，再按标题层级和语义边界切 chunk，表格和 FAQ 会用不同策略。索引层面做增量更新，文档删除和权限变化要同步删除或更新 chunk，并保留索引版本便于灰度和回滚。上线前会用 golden set 验证不同 chunking 策略的 recall@k 和答案 groundedness。",
+    "rationale": "覆盖数据源解析、清洗、metadata、权限、增量更新、回滚和评估闭环。"
+  },
+  {
+    "id": "cal_rag_data_mid_001",
+    "questionId": "rag_data_001",
+    "quality": "acceptable",
+    "expectedScore": 74,
+    "answer": "我会把文档解析成文本，然后按一定长度切分成 chunk，生成 embedding 写入向量库。每个 chunk 会保存标题和来源，方便回答时引用。文档更新后需要重新生成 embedding。如果文档内容很多，可以调整 chunk 大小和 topK。",
+    "rationale": "方向正确，但缺少权限、版本、删除、清洗、增量治理和评估。"
+  },
+  {
+    "id": "cal_rag_data_low_001",
+    "questionId": "rag_data_001",
+    "quality": "poor",
+    "expectedScore": 42,
+    "answer": "企业知识库就是把所有文档上传到向量数据库，然后用户提问时检索相似内容给大模型回答。主要看 embedding 模型好不好，模型足够好就能解决大部分问题。",
+    "rationale": "把 RAG 简化成上传向量库，缺少文档治理、metadata、权限、评估和生产化意识。"
+  },
+  {
+    "id": "cal_vector_high_001",
+    "questionId": "vector_001",
+    "quality": "excellent",
+    "expectedScore": 90,
+    "answer": "embedding 模型决定语义空间，中文效果、领域适配和维度都会影响召回。相似度要和模型训练方式匹配，常见是 cosine 或 dot。HNSW 提供低延迟近似搜索，但会带来索引内存和写入成本；精确搜索适合小规模或评估。不同 embedding 模型的向量不能混用，切模型时文档向量和 query 向量都要重建。线上我会用 recall@k、MRR 和延迟评估不同模型、维度和索引参数。",
+    "rationale": "覆盖 embedding、相似度、索引、跨模型迁移和评估。"
+  },
+  {
+    "id": "cal_vector_mid_001",
+    "questionId": "vector_001",
+    "quality": "acceptable",
+    "expectedScore": 72,
+    "answer": "embedding 把文本转成向量，向量数据库根据相似度找最相关的 chunk。维度越高可能效果越好但成本也更高。索引可以提升检索速度，pgvector 可以用 HNSW。换 embedding 模型时最好重新生成向量。",
+    "rationale": "基础正确，但对相似度、索引参数、评估和迁移风险讲得不够。"
+  },
+  {
+    "id": "cal_vector_low_001",
+    "questionId": "vector_001",
+    "quality": "poor",
+    "expectedScore": 38,
+    "answer": "向量维度就是数组长度，越大越准。相似度就是谁分数高就取谁。不同模型应该也差不多，只要都是 embedding 就可以放一起搜。",
+    "rationale": "有明显错误：认为不同模型向量可混用，且缺少索引和评估理解。"
+  },
+  {
+    "id": "cal_agent_high_001",
+    "questionId": "agent_tool_002",
+    "quality": "excellent",
+    "expectedScore": 93,
+    "answer": "我会把面试状态定义成 session、resumeProfile、candidateProfile、messages、questionPlan、scores、round、status。Graph 节点包括 parseResume、collectSelfIntro、retrieveKnowledge、selectQuestion、askQuestion、scoreAnswer、decideNextStep、finalReport。每个节点只做明确职责，边上根据 round、score 和缺失能力项做条件跳转。需要 checkpoint 支持中断恢复，tool 调用和 LLM 输出都要记录 trace。终止条件包括达到目标轮数、候选人退出或人工接管。",
+    "rationale": "完整体现 stateful graph、节点、条件路由、checkpoint、终止条件和可观测性。"
+  },
+  {
+    "id": "cal_agent_mid_001",
+    "questionId": "agent_tool_002",
+    "quality": "acceptable",
+    "expectedScore": 76,
+    "answer": "可以用 LangGraph 把面试流程分成几个节点，比如简历解析、自我介绍、出题、评分和报告。每轮回答后更新消息和分数，再生成下一题。这样比一个 chain 更清晰，也能保存一些状态。",
+    "rationale": "知道节点化和状态，但缺少具体状态字段、条件路由、恢复和终止控制。"
+  },
+  {
+    "id": "cal_agent_low_001",
+    "questionId": "agent_tool_002",
+    "quality": "poor",
+    "expectedScore": 45,
+    "answer": "我觉得可以写一个很长的 prompt，让模型扮演面试官，然后它自己记住前面的回答并继续提问，最后让它总结评分。",
+    "rationale": "依赖单 prompt，没有结构化状态、流程编排、可恢复性和审计。"
+  },
+  {
+    "id": "cal_safety_high_001",
+    "questionId": "safety_002",
+    "quality": "excellent",
+    "expectedScore": 91,
+    "answer": "上传文件和网页内容都要视为不可信数据，不能让其中的指令覆盖系统指令。我会在 prompt 中明确把它们作为 evidence，而不是 instruction；API key 等密钥永远不进入模型上下文。工具调用走最小权限，按用户和租户做授权，高风险动作需要人工确认和审计。文件解析放沙箱，做 MIME、大小、OCR 和恶意内容检查。输出侧做敏感信息检测，安全事件进入红队样本和报警。",
+    "rationale": "覆盖不可信输入、密钥隔离、工具权限、沙箱、输出和审计闭环。"
+  },
+  {
+    "id": "cal_safety_mid_001",
+    "questionId": "safety_002",
+    "quality": "acceptable",
+    "expectedScore": 73,
+    "answer": "需要防止 prompt injection，可以告诉模型不要泄露密钥，也不要执行用户没有权限的操作。工具调用前检查用户权限，敏感操作让用户确认。上传文件要限制格式和大小。",
+    "rationale": "方向正确，但偏原则，缺少检索内容隔离、密钥不入上下文、沙箱和审计细节。"
+  },
+  {
+    "id": "cal_safety_low_001",
+    "questionId": "safety_002",
+    "quality": "poor",
+    "expectedScore": 35,
+    "answer": "可以在系统 prompt 里写清楚不要泄露 API key。只要模型听指令，通常不会出问题。如果用户输入恶意内容，可以让模型判断是不是攻击。",
+    "rationale": "过度信任模型，没有权限、沙箱、审计和不可信上下文隔离。"
+  },
+  {
+    "id": "cal_prod_high_001",
+    "questionId": "prod_001",
+    "quality": "excellent",
+    "expectedScore": 90,
+    "answer": "我会先拿到用户原始问题、回答、request id 和时间窗口，复现请求。然后看 prompt version、model version、temperature、retrieved chunks、rerank 分数、工具调用结果和缓存命中情况。接着判断是检索没召回、召回排序错误、上下文被污染，还是生成阶段没有遵守证据。修复后把这个 bad case 加入 regression eval，并通过灰度验证满意度和 hallucination 率是否恢复。",
+    "rationale": "按链路排查，覆盖 trace、RAG、模型、缓存、工具、修复和回归。"
+  },
+  {
+    "id": "cal_prod_mid_001",
+    "questionId": "prod_001",
+    "quality": "acceptable",
+    "expectedScore": 75,
+    "answer": "我会先看日志，确认用户问题和模型回答，然后检查检索结果是否相关。如果检索内容不对，就调整 embedding 或 topK；如果检索没问题，就优化 prompt。上线后继续观察用户反馈。",
+    "rationale": "基本链路正确，但缺少版本、trace 字段、rerank、工具、缓存、回归测试和灰度。"
+  },
+  {
+    "id": "cal_prod_low_001",
+    "questionId": "prod_001",
+    "quality": "poor",
+    "expectedScore": 40,
+    "answer": "答非所问一般是模型不够好，可以换一个更强的模型，或者把 prompt 写得更详细一些。",
+    "rationale": "只归因模型和 prompt，没有检索、数据、日志、评估和生产排查能力。"
+  },
+  {
+    "id": "cal_system_high_001",
+    "questionId": "system_001",
+    "quality": "excellent",
+    "expectedScore": 94,
+    "answer": "我会拆成前端、API、文件解析、结构化题库、RAG 知识库、LangGraph workflow、评分服务和报告服务。数据层包括 roles、competencies、questions、rubrics、calibration_samples、knowledge_chunks、resumes、interview_sessions、messages、score_results、final_reports。流程是上传简历解析画像，自我介绍后生成 interview plan，每轮按能力项选题并检索知识库，回答后用 rubric 和校准样本做 LLM judge，最后按权重汇总。生产上要有权限、审计、trace、成本、质量 eval、灰度和人工复核。",
+    "rationale": "完整覆盖架构、数据模型、流程、评分、生产治理和扩展。"
+  },
+  {
+    "id": "cal_system_mid_001",
+    "questionId": "system_001",
+    "quality": "acceptable",
+    "expectedScore": 76,
+    "answer": "系统包括上传简历、解析简历、对话面试、评分和报告。后端调用 LLM 和 RAG，数据库保存简历、消息和分数。题库可以放 markdown 或数据库里，Agent 根据回答继续提问。",
+    "rationale": "模块正确，但缺少结构化题库、rubric、校准、权限、安全、观测和扩展设计。"
+  },
+  {
+    "id": "cal_system_low_001",
+    "questionId": "system_001",
+    "quality": "poor",
+    "expectedScore": 46,
+    "answer": "做一个聊天页面，用户上传简历后把简历内容发给大模型，让大模型扮演面试官提问，最后让大模型打分即可。",
+    "rationale": "只是 demo 方案，不具备企业级题库、数据治理、可观测性和评分校准。"
+  }
+]
