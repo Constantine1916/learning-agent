@@ -50,7 +50,11 @@ source .env.local
 set +a
 psql "$DATABASE_URL" -f drizzle/0000_init.sql
 psql "$DATABASE_URL" -f drizzle/0002_embedding_ollama_4b_1536.sql
+psql "$DATABASE_URL" -f drizzle/0003_enterprise_interview_bank.sql
+npm run ingest:bank
+npm run collect:knowledge
 npm run ingest:knowledge
+npm run eval:calibration
 ```
 
 启动应用：
@@ -111,15 +115,37 @@ rubrics.json              # 企业级评分 rubric
 calibration-samples.json  # 高/中/低分校准样本
 sources.json              # 公开资料来源和使用说明
 knowledge.md              # RAG 参考知识库
+collected-knowledge.jsonl # 采集后整理的来源知识块
+collected-knowledge.md    # 采集知识块的人类可读版本
 ```
 
-更新 `knowledge.md` 后执行：
+结构化题库和 RAG 知识库是两层：
+
+- `role.json`、`competencies.json`、`questions.json`、`rubrics.json`、`calibration-samples.json` 会写入 `interview_bank_*` 表，作为面试选题、能力覆盖、评分 rubric 和校准样本的强结构来源。
+- `knowledge.md` 和 `collected-knowledge.jsonl` 会切分、embedding 后写入 `knowledge_chunks`，作为面试官动态追问、评分参考和知识补充的 RAG 上下文。
+
+更新结构化题库后执行：
 
 ```bash
+npm run ingest:bank
+```
+
+更新 `knowledge.md` 或重新采集来源资料后执行：
+
+```bash
+npm run collect:knowledge
 npm run ingest:knowledge
 ```
 
-结构化题库 JSON 会在面试流程中由 `lib/interview-bank` 直接读取；`knowledge.md` 会被切成 `knowledge_chunks` 并写入 pgvector，作为 Agent 出题和评分时的 RAG 背景知识。
+采集脚本只保存基于官方/高质量来源改写整理的知识块、来源 URL、标题、能力项、license/usage 说明和短证据片段，不保存整页原文。
+
+校准评分样本：
+
+```bash
+npm run eval:calibration
+```
+
+当前确定性校准会验证优秀、合格、较差样本是否落在预期分数带；真实面试评分仍由 LLM judge 结合 rubric、校准样本和候选人回答完成。
 
 ## API
 

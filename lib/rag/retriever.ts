@@ -19,7 +19,7 @@ export async function retrieveKnowledge(query: string, limit = 4): Promise<Knowl
     try {
       const embedding = await embedText(query)
       const rows = await db.execute(sql`
-        SELECT id, role_id, source_path, title, competency, content, rubric,
+        SELECT id, role_id, source_path, source_url, source_title, license_usage, title, competency, content, rubric, metadata,
                1 - (embedding <=> ${JSON.stringify(embedding)}::vector) AS score
         FROM knowledge_chunks
         WHERE role_id = ${ROLE_ID}
@@ -31,10 +31,14 @@ export async function retrieveKnowledge(query: string, limit = 4): Promise<Knowl
         id: row.id,
         roleId: row.role_id,
         sourcePath: row.source_path,
+        sourceUrl: row.source_url,
+        sourceTitle: row.source_title,
+        licenseUsage: row.license_usage,
         title: row.title,
         competency: row.competency,
         content: row.content,
         rubric: row.rubric ?? [],
+        metadata: row.metadata ?? null,
         score: Number(row.score ?? 0),
       }))
 
@@ -80,10 +84,14 @@ export async function saveKnowledgeChunks(chunks: KnowledgeChunk[]) {
     chunks.map((chunk, index) => ({
       roleId: chunk.roleId,
       sourcePath: chunk.sourcePath,
+      sourceUrl: chunk.sourceUrl ?? null,
+      sourceTitle: chunk.sourceTitle ?? null,
+      licenseUsage: chunk.licenseUsage ?? null,
       title: chunk.title,
       competency: chunk.competency,
       content: chunk.content,
       rubric: chunk.rubric,
+      metadata: chunk.metadata ?? null,
       embedding: embeddings[index],
     })),
   )

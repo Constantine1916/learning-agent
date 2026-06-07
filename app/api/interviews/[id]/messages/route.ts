@@ -10,7 +10,8 @@ import {
   saveFinalReport,
   updateInterviewSession,
 } from '@/lib/db/repository'
-import { TARGET_ROUNDS } from '@/lib/types'
+import { getInterviewBank } from '@/lib/interview-bank/loader'
+import { TARGET_ROUNDS, type FinalReport, type ScoreResult } from '@/lib/types'
 
 export const runtime = 'nodejs'
 
@@ -79,19 +80,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
         const completedScores = [...scores, score]
         if (graphResult.finalReport || completedScores.length >= TARGET_ROUNDS) {
-          const report = graphResult.finalReport ?? {
-            totalScore: Math.round(completedScores.reduce((sum, item) => sum + item.score, 0) / completedScores.length),
-            passed:
-              Math.round(completedScores.reduce((sum, item) => sum + item.score, 0) / completedScores.length) >= 80,
-            summary: '面试结束，系统已生成综合报告。',
-            strengths: completedScores.filter((item) => item.passed).map((item) => item.competency),
-            weaknesses: completedScores.filter((item) => !item.passed).map((item) => item.competency),
-            learningAdvice: ['继续补充真实项目案例、上线指标、风险处理和复盘经验。'],
-            abilityRadar: completedScores.map((item) => ({
-              competency: item.competency,
-              score: item.score,
-            })),
-          }
+          const report = graphResult.finalReport ?? (await weightedFallbackReport(completedScores))
           await saveFinalReport(session.id, report)
           await updateInterviewSession(session.id, {
             status: 'completed',
@@ -143,4 +132,35 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       'Cache-Control': 'no-cache',
     },
   })
+}
+
+async function weightedFallbackReport(scores: ScoreResult[]): Promise<FinalReport> {
+  const bank = await getInterviewBank()
+  const scoresByCompetency = new Map<string, ScoreResult[]>()
+  for (const score of scores) {
+    scoresByCompetency.set(score.competency, [...(scoresByCompetency.get(score.competency) ?? []), score])
+  }
+
+  let weightedSum = 0
+  let coveredWeight = 0
+  const abilityRadar = [...scoresByCompetency].map(([competencyName, competencyScores]) => {
+    const average = Math.round(
+      competencyScores.reduce((sum, item) => sum + item.score, 0) / Math.max(competencyScores.length, 1),
+    )
+    const weight = bank.competencies.find((competency) => competency.name === competencyName)?.weight ?? 1
+    weightedSum += average * weight
+    coveredWeight += weight
+    return { competency: competencyName, score: average }
+  })
+  const totalScore = coveredWeight ? Math.round(weightedSum / coveredWeight) : 0
+
+  return {
+    totalScore,
+    passed: totalScore >= bank.role.passingScore,
+    summary: '面试结束，系统已按能力项权重生成综合报告。',
+    strengths: scores.filter((item) => item.passed).map((item) => item.competency),
+    weaknesses: scores.filter((item) => !item.passed).map((item) => item.competency),
+    learningAdvice: ['继续补充真实项目案例、上线指标、风险处理和复盘经验。'],
+    abilityRadar,
+  }
 }

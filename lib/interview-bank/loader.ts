@@ -1,5 +1,15 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { eq } from 'drizzle-orm'
+import { getDb } from '@/lib/db'
+import {
+  interviewBankCalibrationSamples,
+  interviewBankCompetencies,
+  interviewBankQuestions,
+  interviewBankRoles,
+  interviewBankRubrics,
+  interviewBankSources,
+} from '@/lib/db/schema'
 import { ROLE_ID } from '@/lib/types'
 import {
   bankQuestionSchema,
@@ -32,6 +42,18 @@ export async function getInterviewBank(roleId = ROLE_ID): Promise<InterviewBank>
     return cachedBank
   }
 
+  const databaseBank = await readInterviewBankFromDatabase(roleId)
+  if (databaseBank) {
+    cachedBank = databaseBank
+    return databaseBank
+  }
+
+  const fileBank = await readInterviewBankFromFiles(roleId)
+  cachedBank = fileBank
+  return fileBank
+}
+
+export async function readInterviewBankFromFiles(roleId = ROLE_ID): Promise<InterviewBank> {
   const dir = getInterviewBankDir(roleId)
   const role = interviewRoleSchema.parse(await readJson(path.join(dir, 'role.json')))
   const competencies = competencySchema.array().parse(await readJson(path.join(dir, 'competencies.json')))
@@ -52,7 +74,6 @@ export async function getInterviewBank(roleId = ROLE_ID): Promise<InterviewBank>
     knowledgePath: getInterviewBankKnowledgePath(roleId),
   }
   validateBank(bank)
-  cachedBank = bank
   return bank
 }
 
@@ -82,6 +103,43 @@ export function getCalibrationSamples(bank: InterviewBank, questionId: string): 
 
 async function readJson(filePath: string): Promise<unknown> {
   return JSON.parse(await readFile(filePath, 'utf8'))
+}
+
+async function readInterviewBankFromDatabase(roleId: string): Promise<InterviewBank | null> {
+  const db = getDb()
+  if (!db) {
+    return null
+  }
+
+  try {
+    const [roleRow] = await db.select().from(interviewBankRoles).where(eq(interviewBankRoles.id, roleId)).limit(1)
+    if (!roleRow) {
+      return null
+    }
+
+    const [competencyRows, rubricRows, questionRows, sampleRows, sourceRows] = await Promise.all([
+      db.select().from(interviewBankCompetencies).where(eq(interviewBankCompetencies.roleId, roleId)),
+      db.select().from(interviewBankRubrics).where(eq(interviewBankRubrics.roleId, roleId)),
+      db.select().from(interviewBankQuestions).where(eq(interviewBankQuestions.roleId, roleId)),
+      db.select().from(interviewBankCalibrationSamples).where(eq(interviewBankCalibrationSamples.roleId, roleId)),
+      db.select().from(interviewBankSources).where(eq(interviewBankSources.roleId, roleId)),
+    ])
+
+    const bank = {
+      role: interviewRoleSchema.parse(roleRow.data),
+      competencies: competencySchema.array().parse(competencyRows.map((row) => row.data)),
+      rubrics: rubricSchema.array().parse(rubricRows.map((row) => row.data)),
+      questions: bankQuestionSchema.array().parse(questionRows.map((row) => row.data)),
+      calibrationSamples: calibrationSampleSchema.array().parse(sampleRows.map((row) => row.data)),
+      sources: sourceSchema.array().parse(sourceRows.map((row) => row.data)),
+      knowledgePath: getInterviewBankKnowledgePath(roleId),
+    }
+    validateBank(bank)
+    return bank
+  } catch (error) {
+    console.warn('Falling back to file interview bank because database bank could not be loaded.', error)
+    return null
+  }
 }
 
 function validateBank(bank: InterviewBank) {

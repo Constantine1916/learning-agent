@@ -106,10 +106,14 @@ export type KnowledgeChunk = {
   id: string
   roleId: string
   sourcePath: string
+  sourceUrl?: string | null
+  sourceTitle?: string | null
+  licenseUsage?: string | null
   title: string
   competency: string
   content: string
   rubric: string[]
+  metadata?: Record<string, unknown> | null
   score?: number
 }
 

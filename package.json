@@ -12,11 +12,15 @@
     "db:generate": "set -a; [ -f .env.local ] && . ./.env.local; set +a; drizzle-kit generate",
     "db:migrate": "set -a; [ -f .env.local ] && . ./.env.local; set +a; drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "ingest:knowledge": "set -a; [ -f .env.local ] && . ./.env.local; set +a; tsx scripts/ingest-knowledge.ts"
+    "ingest:bank": "set -a; [ -f .env.local ] && . ./.env.local; set +a; tsx scripts/ingest-interview-bank.ts",
+    "ingest:knowledge": "set -a; [ -f .env.local ] && . ./.env.local; set +a; tsx scripts/ingest-knowledge.ts",
+    "collect:knowledge": "tsx scripts/collect-ai-engineer-sources.ts",
+    "eval:calibration": "set -a; [ -f .env.local ] && . ./.env.local; set +a; tsx scripts/evaluate-calibration.ts"
   },
   "dependencies": {
     "@langchain/langgraph": "^1.3.2",
     "@langchain/openai": "^1.4.7",
+    "cheerio": "^1.2.0",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.17.0",
     "mammoth": "^1.12.0",

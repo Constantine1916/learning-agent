@@ -282,7 +282,8 @@ async function buildFinalReport(input: {
   scores: ScoreResult[]
   messages: InterviewMessage[]
 }): Promise<FinalReport> {
-  return invokeJson(
+  const weighted = await calculateWeightedScore(input.scores)
+  const report = await invokeJson(
     [
       {
         role: 'system',
@@ -292,12 +293,21 @@ async function buildFinalReport(input: {
         role: 'user',
         content: `候选人简历：${JSON.stringify(input.resume.profile)}\n\n评分明细：${JSON.stringify(
           input.scores,
-        )}\n\n对话：${formatMessages(input.messages)}`,
+        )}\n\n加权评分结果：${JSON.stringify(
+          weighted,
+        )}\n\n对话：${formatMessages(input.messages)}\n\n最终 totalScore 和 passed 必须采用加权评分结果；不要简单平均所有题目。`,
       },
     ],
     finalReportSchema,
-    () => fallbackFinalReport(input.scores),
+    () => fallbackFinalReport(input.scores, weighted),
   )
+
+  return finalReportSchema.parse({
+    ...report,
+    totalScore: weighted.totalScore,
+    passed: weighted.passed,
+    abilityRadar: weighted.abilityRadar,
+  })
 }
 
 function findLatestQuestion(messages: InterviewMessage[]): InterviewQuestion {
@@ -396,10 +406,10 @@ function signalMatched(signal: string, competency: string, normalizedAnswer: str
   return matches.length >= Math.min(2, Math.max(1, Math.ceil(signalTokens.length / 3)))
 }
 
-function fallbackFinalReport(scores: ScoreResult[]): FinalReport {
-  const totalScore = scores.length
-    ? Math.round(scores.reduce((sum, score) => sum + score.score, 0) / scores.length)
-    : 0
+function fallbackFinalReport(scores: ScoreResult[], weighted?: WeightedScoreSummary): FinalReport {
+  const totalScore =
+    weighted?.totalScore ??
+    (scores.length ? Math.round(scores.reduce((sum, score) => sum + score.score, 0) / scores.length) : 0)
   const strengths = scores.filter((score) => score.score >= PASSING_SCORE).map((score) => score.competency)
   const weaknesses = scores.filter((score) => score.score < PASSING_SCORE).map((score) => score.competency)
 
@@ -417,11 +427,54 @@ function fallbackFinalReport(scores: ScoreResult[]): FinalReport {
       '回答时主动给出指标、风险、取舍和复盘结果。',
       '补充 prompt injection、权限控制、成本延迟和观测体系经验。',
     ],
-    abilityRadar: scores.map((score) => ({
-      competency: score.competency,
-      score: score.score,
-    })),
+    abilityRadar:
+      weighted?.abilityRadar ??
+      scores.map((score) => ({
+        competency: score.competency,
+        score: score.score,
+      })),
   })
+}
+
+type WeightedScoreSummary = {
+  totalScore: number
+  passed: boolean
+  coveredWeight: number
+  abilityRadar: Array<{
+    competency: string
+    score: number
+  }>
+}
+
+async function calculateWeightedScore(scores: ScoreResult[]): Promise<WeightedScoreSummary> {
+  const bank = await getInterviewBank()
+  const byCompetency = new Map<string, ScoreResult[]>()
+  for (const score of scores) {
+    byCompetency.set(score.competency, [...(byCompetency.get(score.competency) ?? []), score])
+  }
+
+  let weightedSum = 0
+  let coveredWeight = 0
+  const abilityRadar: Array<{ competency: string; score: number }> = []
+
+  for (const [competencyName, competencyScores] of byCompetency) {
+    const competency = bank.competencies.find((item) => item.name === competencyName)
+    const average = Math.round(
+      competencyScores.reduce((sum, score) => sum + score.score, 0) / Math.max(competencyScores.length, 1),
+    )
+    const weight = competency?.weight ?? 1
+    weightedSum += average * weight
+    coveredWeight += weight
+    abilityRadar.push({ competency: competencyName, score: average })
+  }
+
+  const totalScore = coveredWeight > 0 ? Math.round(weightedSum / coveredWeight) : 0
+  return {
+    totalScore,
+    passed: totalScore >= bank.role.passingScore,
+    coveredWeight,
+    abilityRadar,
+  }
 }
 
 function formatChunks(chunks: KnowledgeChunk[]): string {
