@@ -11,15 +11,21 @@ type CollectedKnowledgeChunk = {
   roleId: string
   source: string
   sourceUrl: string
+  sourceFinalUrl?: string
   sourceTitle: string
   publisher: string
   licenseUsage: string
+  reliability?: string
+  sourceKind?: string
   title: string
   competency: string
   content: string
   rubric: string[]
   tags: string[]
+  classification?: Record<string, unknown>
+  quality?: Record<string, unknown>
   textStats: Record<string, unknown>
+  cleaning?: Record<string, unknown>
   collectedAt: string
 }
 
@@ -73,9 +79,15 @@ async function loadCollectedKnowledgeChunks(): Promise<KnowledgeChunk[]> {
       metadata: {
         sourceChunkId: chunk.id,
         source: chunk.source,
+        sourceFinalUrl: chunk.sourceFinalUrl,
         publisher: chunk.publisher,
+        reliability: chunk.reliability,
+        sourceKind: chunk.sourceKind,
         tags: chunk.tags,
+        classification: chunk.classification,
+        quality: chunk.quality,
         textStats: chunk.textStats,
+        cleaning: chunk.cleaning,
         collectedAt: chunk.collectedAt,
       },
     }))

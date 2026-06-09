@@ -9,13 +9,13 @@ export function chunkKnowledgeMarkdown(markdown: string, sourcePath: string, rol
   return sections.map((section, index) => {
     const lines = section.split('\n')
     const title = lines[0].replace(/^##\s+/, '').trim()
-    const competencyLine = lines.find((line) => line.toLowerCase().startsWith('competency:'))
+    const metadata = parseSectionMetadata(lines)
     const rubric = lines
       .filter((line) => line.trim().startsWith('- '))
       .map((line) => line.replace(/^\s*-\s*/, '').trim())
       .filter(Boolean)
     const content = lines
-      .filter((line) => !line.toLowerCase().startsWith('competency:'))
+      .filter((line) => !metadataLinePattern.test(line))
       .join('\n')
       .trim()
 
@@ -23,12 +23,42 @@ export function chunkKnowledgeMarkdown(markdown: string, sourcePath: string, rol
       id: stableChunkId(sourcePath, index, title),
       roleId,
       sourcePath,
+      sourceUrl: metadata.url,
+      sourceTitle: metadata.source,
+      licenseUsage: metadata.licenseUsage,
       title,
-      competency: competencyLine?.replace(/^competency:\s*/i, '').trim() || 'AI 应用工程',
+      competency: metadata.competency || 'AI 应用工程',
       content,
       rubric,
+      metadata: {
+        tags: metadata.tags,
+        classification: metadata.classification,
+        evidence: metadata.evidence,
+      },
     }
   })
+}
+
+const metadataLinePattern = /^(competency|tags|source|url|license\/usage|evidence|classification):\s*/i
+
+function parseSectionMetadata(lines: string[]) {
+  const value = (name: string) => {
+    const line = lines.find((item) => item.toLowerCase().startsWith(`${name.toLowerCase()}:`))
+    return line?.replace(new RegExp(`^${escapeRegExp(name)}:\\s*`, 'i'), '').trim()
+  }
+
+  return {
+    competency: value('Competency'),
+    tags: (value('Tags') ?? '')
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+    source: value('Source'),
+    url: value('URL'),
+    licenseUsage: value('License/Usage'),
+    evidence: value('Evidence'),
+    classification: value('Classification'),
+  }
 }
 
 export function lexicalScore(query: string, content: string): number {
@@ -44,6 +74,10 @@ export function lexicalScore(query: string, content: string): number {
 
 function tokenize(text: string): string[] {
   return (text.toLowerCase().match(/[\p{L}\p{N}_-]+/gu) ?? []).filter((token) => token.length > 1)
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function stableChunkId(sourcePath: string, index: number, title: string): string {

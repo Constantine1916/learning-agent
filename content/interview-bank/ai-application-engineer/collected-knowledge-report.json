@@ -1,0 +1,1478 @@
+{
+  "roleId": "ai-application-engineer",
+  "collectedAt": "2026-06-09T17:13:55.313Z",
+  "sourceCount": 26,
+  "chunkCount": 29,
+  "failedSourceCount": 0,
+  "failures": [],
+  "cleaningPolicy": {
+    "parser": "cheerio",
+    "removedSelectors": [
+      "script",
+      "style",
+      "nav",
+      "header",
+      "footer",
+      "aside",
+      "noscript",
+      "svg",
+      "[aria-hidden=\"true\"]",
+      ".cookie",
+      ".cookies",
+      ".banner"
+    ],
+    "normalizedWhitespace": true,
+    "rawPageTextPersisted": false,
+    "copyrightPolicy": "Persist only derived notes, metadata, hashes, and short evidence snippets."
+  },
+  "counts": {
+    "byCompetency": {
+      "Prompt 工程": 1,
+      "结构化输出": 2,
+      "Agent 工具调用": 5,
+      "向量检索": 6,
+      "RAG 评估": 3,
+      "生产排查": 2,
+      "AI 安全": 3,
+      "对话状态管理": 1,
+      "RAG 数据治理": 3,
+      "AI 前端工程": 2,
+      "系统设计": 1
+    },
+    "byStage": {
+      "generation": 2,
+      "production": 3,
+      "agent": 6,
+      "retrieval": 6,
+      "evaluation": 3,
+      "safety": 3,
+      "ingestion": 3,
+      "frontend": 2,
+      "system-design": 1
+    },
+    "byDepth": {
+      "production": 12,
+      "senior": 15,
+      "foundation": 2
+    },
+    "byReliability": {
+      "official": 19,
+      "vendor-docs": 4,
+      "engineering-article": 2,
+      "community-reference": 2,
+      "standard": 2
+    },
+    "bySourceKind": {
+      "api-doc": 9,
+      "framework-doc": 5,
+      "engineering-guide": 8,
+      "vector-db-doc": 2,
+      "security-standard": 2,
+      "web-platform-doc": 2,
+      "interview-reference": 1
+    }
+  },
+  "sources": [
+    {
+      "id": "openai_prompt_engineering",
+      "title": "OpenAI Prompt Engineering Guide",
+      "url": "https://platform.openai.com/docs/guides/prompt-engineering",
+      "publisher": "OpenAI",
+      "reliability": "official",
+      "sourceKind": "api-doc",
+      "primaryCompetency": "Prompt 工程",
+      "topicCount": 1
+    },
+    {
+      "id": "openai_structured_outputs",
+      "title": "OpenAI Structured Outputs Guide",
+      "url": "https://platform.openai.com/docs/guides/structured-outputs",
+      "publisher": "OpenAI",
+      "reliability": "official",
+      "sourceKind": "api-doc",
+      "primaryCompetency": "结构化输出",
+      "topicCount": 2
+    },
+    {
+      "id": "openai_function_calling",
+      "title": "OpenAI Function Calling Guide",
+      "url": "https://platform.openai.com/docs/guides/function-calling",
+      "publisher": "OpenAI",
+      "reliability": "official",
+      "sourceKind": "api-doc",
+      "primaryCompetency": "Agent 工具调用",
+      "topicCount": 1
+    },
+    {
+      "id": "openai_tools",
+      "title": "OpenAI Tools Guide",
+      "url": "https://platform.openai.com/docs/guides/tools",
+      "publisher": "OpenAI",
+      "reliability": "official",
+      "sourceKind": "api-doc",
+      "primaryCompetency": "Agent 工具调用",
+      "topicCount": 1
+    },
+    {
+      "id": "openai_embeddings",
+      "title": "OpenAI Embeddings Guide",
+      "url": "https://platform.openai.com/docs/guides/embeddings",
+      "publisher": "OpenAI",
+      "reliability": "official",
+      "sourceKind": "api-doc",
+      "primaryCompetency": "向量检索",
+      "topicCount": 1
+    },
+    {
+      "id": "openai_evals",
+      "title": "OpenAI Evals Guide",
+      "url": "https://platform.openai.com/docs/guides/evals",
+      "publisher": "OpenAI",
+      "reliability": "official",
+      "sourceKind": "api-doc",
+      "primaryCompetency": "RAG 评估",
+      "topicCount": 1
+    },
+    {
+      "id": "openai_production_best_practices",
+      "title": "OpenAI Production Best Practices",
+      "url": "https://platform.openai.com/docs/guides/production-best-practices",
+      "publisher": "OpenAI",
+      "reliability": "official",
+      "sourceKind": "api-doc",
+      "primaryCompetency": "生产排查",
+      "topicCount": 1
+    },
+    {
+      "id": "openai_safety_best_practices",
+      "title": "OpenAI Safety Best Practices",
+      "url": "https://platform.openai.com/docs/guides/safety-best-practices",
+      "publisher": "OpenAI",
+      "reliability": "official",
+      "sourceKind": "api-doc",
+      "primaryCompetency": "AI 安全",
+      "topicCount": 1
+    },
+    {
+      "id": "langgraph_overview",
+      "title": "LangGraph Overview",
+      "url": "https://docs.langchain.com/oss/javascript/langgraph/overview",
+      "publisher": "LangChain",
+      "reliability": "official",
+      "sourceKind": "framework-doc",
+      "primaryCompetency": "Agent 工具调用",
+      "topicCount": 2
+    },
+    {
+      "id": "langchain_rag",
+      "title": "LangChain RAG Documentation",
+      "url": "https://docs.langchain.com/oss/javascript/langchain/rag",
+      "publisher": "LangChain",
+      "reliability": "official",
+      "sourceKind": "framework-doc",
+      "primaryCompetency": "RAG 数据治理",
+      "topicCount": 1
+    },
+    {
+      "id": "langsmith_observability",
+      "title": "LangSmith Observability",
+      "url": "https://docs.langchain.com/langsmith/observability",
+      "publisher": "LangChain",
+      "reliability": "official",
+      "sourceKind": "framework-doc",
+      "primaryCompetency": "生产排查",
+      "topicCount": 1
+    },
+    {
+      "id": "llamaindex_production_rag",
+      "title": "LlamaIndex Production RAG",
+      "url": "https://docs.llamaindex.ai/en/stable/optimizing/production_rag/",
+      "publisher": "LlamaIndex",
+      "reliability": "vendor-docs",
+      "sourceKind": "engineering-guide",
+      "primaryCompetency": "RAG 数据治理",
+      "topicCount": 2
+    },
+    {
+      "id": "llamaindex_evaluating",
+      "title": "LlamaIndex Evaluating Guide",
+      "url": "https://docs.llamaindex.ai/en/stable/module_guides/evaluating/",
+      "publisher": "LlamaIndex",
+      "reliability": "vendor-docs",
+      "sourceKind": "engineering-guide",
+      "primaryCompetency": "RAG 评估",
+      "topicCount": 1
+    },
+    {
+      "id": "pinecone_rerankers",
+      "title": "Pinecone Rerankers for RAG",
+      "url": "https://www.pinecone.io/learn/series/rag/rerankers/",
+      "publisher": "Pinecone",
+      "reliability": "engineering-article",
+      "sourceKind": "engineering-guide",
+      "primaryCompetency": "向量检索",
+      "topicCount": 1
+    },
+    {
+      "id": "azure_hybrid_search",
+      "title": "Azure AI Search Hybrid Search Overview",
+      "url": "https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview",
+      "publisher": "Microsoft",
+      "reliability": "official",
+      "sourceKind": "engineering-guide",
+      "primaryCompetency": "向量检索",
+      "topicCount": 1
+    },
+    {
+      "id": "azure_vector_search",
+      "title": "Azure AI Search Vector Search Overview",
+      "url": "https://learn.microsoft.com/en-us/azure/search/vector-search-overview",
+      "publisher": "Microsoft",
+      "reliability": "official",
+      "sourceKind": "engineering-guide",
+      "primaryCompetency": "向量检索",
+      "topicCount": 1
+    },
+    {
+      "id": "pgvector_indexing",
+      "title": "pgvector README",
+      "url": "https://github.com/pgvector/pgvector",
+      "publisher": "pgvector",
+      "reliability": "community-reference",
+      "sourceKind": "vector-db-doc",
+      "primaryCompetency": "向量检索",
+      "topicCount": 1
+    },
+    {
+      "id": "qdrant_hybrid_queries",
+      "title": "Qdrant Hybrid Queries",
+      "url": "https://qdrant.tech/documentation/concepts/hybrid-queries/",
+      "publisher": "Qdrant",
+      "reliability": "vendor-docs",
+      "sourceKind": "vector-db-doc",
+      "primaryCompetency": "向量检索",
+      "topicCount": 1
+    },
+    {
+      "id": "anthropic_effective_agents",
+      "title": "Anthropic Building Effective Agents",
+      "url": "https://www.anthropic.com/engineering/building-effective-agents",
+      "publisher": "Anthropic",
+      "reliability": "engineering-article",
+      "sourceKind": "engineering-guide",
+      "primaryCompetency": "Agent 工具调用",
+      "topicCount": 1
+    },
+    {
+      "id": "mcp_tools",
+      "title": "Model Context Protocol Tools",
+      "url": "https://modelcontextprotocol.io/docs/concepts/tools",
+      "publisher": "Model Context Protocol",
+      "reliability": "official",
+      "sourceKind": "framework-doc",
+      "primaryCompetency": "Agent 工具调用",
+      "topicCount": 1
+    },
+    {
+      "id": "microsoft_rag_design",
+      "title": "Microsoft Azure RAG solution design and evaluation guide",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide",
+      "publisher": "Microsoft",
+      "reliability": "official",
+      "sourceKind": "engineering-guide",
+      "primaryCompetency": "RAG 评估",
+      "topicCount": 1
+    },
+    {
+      "id": "owasp_llm_top_10",
+      "title": "OWASP Top 10 for LLM and Gen AI Apps",
+      "url": "https://genai.owasp.org/llm-top-10/",
+      "publisher": "OWASP",
+      "reliability": "standard",
+      "sourceKind": "security-standard",
+      "primaryCompetency": "AI 安全",
+      "topicCount": 1
+    },
+    {
+      "id": "nist_ai_rmf",
+      "title": "NIST AI Risk Management Framework",
+      "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "publisher": "NIST",
+      "reliability": "standard",
+      "sourceKind": "security-standard",
+      "primaryCompetency": "AI 安全",
+      "topicCount": 1
+    },
+    {
+      "id": "developer_experience_streaming",
+      "title": "MDN Server-sent events",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events",
+      "publisher": "MDN Web Docs",
+      "reliability": "official",
+      "sourceKind": "web-platform-doc",
+      "primaryCompetency": "AI 前端工程",
+      "topicCount": 1
+    },
+    {
+      "id": "mdn_websocket",
+      "title": "MDN WebSocket API",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API",
+      "publisher": "MDN Web Docs",
+      "reliability": "official",
+      "sourceKind": "web-platform-doc",
+      "primaryCompetency": "AI 前端工程",
+      "topicCount": 1
+    },
+    {
+      "id": "llm_interview_questions",
+      "title": "llmgenai/LLMInterviewQuestions",
+      "url": "https://github.com/llmgenai/LLMInterviewQuestions",
+      "publisher": "llmgenai",
+      "reliability": "community-reference",
+      "sourceKind": "interview-reference",
+      "primaryCompetency": "系统设计",
+      "topicCount": 1
+    }
+  ],
+  "chunks": [
+    {
+      "id": "ed61219d18df",
+      "title": "Prompt 指令设计与评估",
+      "competency": "Prompt 工程",
+      "source": "openai_prompt_engineering",
+      "sourceUrl": "https://platform.openai.com/docs/guides/prompt-engineering",
+      "tags": [
+        "prompt",
+        "context-engineering",
+        "evaluation",
+        "structured-output",
+        "prompt 工程",
+        "openai"
+      ],
+      "classification": {
+        "stage": "generation",
+        "depth": "production",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Prompt engineering | OpenAI API",
+        "textHash": "9cf37ffcfd861d6294f7d5223d409b6081bcf515d62fa96c808a3cb6a278fa8b",
+        "rawCharCount": 515424,
+        "cleanedCharCount": 27678,
+        "wordLikeCount": 4307,
+        "sourceEvidence": "Responses Copy Page Responses With the OpenAI API you can use a large language model to generate text",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "812e0156fd8e",
+      "title": "严格 Schema 输出与后端校验",
+      "competency": "结构化输出",
+      "source": "openai_structured_outputs",
+      "sourceUrl": "https://platform.openai.com/docs/guides/structured-outputs",
+      "tags": [
+        "structured-output",
+        "json-schema",
+        "validation",
+        "zod",
+        "llm-judge",
+        "结构化输出",
+        "openai"
+      ],
+      "classification": {
+        "stage": "generation",
+        "depth": "production",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Structured model outputs | OpenAI API",
+        "textHash": "fa69e8c987a8057c1f64896de6c5da3e3cdaf8e988c72244ed99f141cb28d71c",
+        "rawCharCount": 1369361,
+        "cleanedCharCount": 95836,
+        "wordLikeCount": 14031,
+        "sourceEvidence": "Some benefits of Structured Outputs include Reliable type-safety No need to validate or retry incorrectly formatted responses Explicit",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "bcf93a17638c",
+      "title": "结构化输出的失败恢复策略",
+      "competency": "结构化输出",
+      "source": "openai_structured_outputs",
+      "sourceUrl": "https://platform.openai.com/docs/guides/structured-outputs",
+      "tags": [
+        "structured-output",
+        "error-recovery",
+        "regression-eval",
+        "schema-repair",
+        "结构化输出",
+        "openai"
+      ],
+      "classification": {
+        "stage": "production",
+        "depth": "senior",
+        "interviewUse": "follow-up"
+      },
+      "quality": {
+        "score": 98,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Structured model outputs | OpenAI API",
+        "textHash": "fa69e8c987a8057c1f64896de6c5da3e3cdaf8e988c72244ed99f141cb28d71c",
+        "rawCharCount": 1369361,
+        "cleanedCharCount": 95836,
+        "wordLikeCount": 14031,
+        "sourceEvidence": "Responses Copy Page Responses JSON is one of the most widely used formats in the world for applications",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "8058ec3572af",
+      "title": "工具调用参数协议与权限边界",
+      "competency": "Agent 工具调用",
+      "source": "openai_function_calling",
+      "sourceUrl": "https://platform.openai.com/docs/guides/function-calling",
+      "tags": [
+        "function-calling",
+        "tool-schema",
+        "permissions",
+        "idempotency",
+        "audit",
+        "agent 工具调用",
+        "openai"
+      ],
+      "classification": {
+        "stage": "agent",
+        "depth": "production",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Function calling | OpenAI API",
+        "textHash": "ffdc6b1927fb633657f6ce8963c5b2b9c72b7a2d0dd497deaebcb3637f647cd4",
+        "rawCharCount": 838030,
+        "cleanedCharCount": 49989,
+        "wordLikeCount": 7610,
+        "sourceEvidence": "Responses Copy Page Responses Function calling also known as tool calling provides a powerful and flexible way for",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "2730a275f74c",
+      "title": "内置工具与业务工具的选择边界",
+      "competency": "Agent 工具调用",
+      "source": "openai_tools",
+      "sourceUrl": "https://platform.openai.com/docs/guides/tools",
+      "tags": [
+        "tools",
+        "tool-use",
+        "agent-boundaries",
+        "cost-control",
+        "agent 工具调用",
+        "openai"
+      ],
+      "classification": {
+        "stage": "agent",
+        "depth": "production",
+        "interviewUse": "follow-up"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Using tools | OpenAI API",
+        "textHash": "1599691a59e52ee48fea38ee3da3dfb314681efcd5dcd5a9b54d9eab59c1be31",
+        "rawCharCount": 451127,
+        "cleanedCharCount": 14407,
+        "wordLikeCount": 2047,
+        "sourceEvidence": "Starter app Experiment with built-in tools in the Responses API",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "d8d0bee9304f",
+      "title": "Embedding 与语义检索能力",
+      "competency": "向量检索",
+      "source": "openai_embeddings",
+      "sourceUrl": "https://platform.openai.com/docs/guides/embeddings",
+      "tags": [
+        "embedding",
+        "semantic-search",
+        "vector-db",
+        "recall-at-k",
+        "向量检索",
+        "openai"
+      ],
+      "classification": {
+        "stage": "retrieval",
+        "depth": "foundation",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Vector embeddings | OpenAI API",
+        "textHash": "e2f4b51e3d5d018c3bb865915ca9bb116328cf7e09af52f447dca66785d3efd7",
+        "rawCharCount": 486180,
+        "cleanedCharCount": 19585,
+        "wordLikeCount": 2898,
+        "sourceEvidence": "Copy Page New embedding modelstext-embedding-3-small and text-embedding-3-large our newest and most performant embedding models are now available",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "773328c55efc",
+      "title": "LLM 应用评估与回归测试",
+      "competency": "RAG 评估",
+      "source": "openai_evals",
+      "sourceUrl": "https://platform.openai.com/docs/guides/evals",
+      "tags": [
+        "evals",
+        "llm-judge",
+        "golden-set",
+        "regression",
+        "rag 评估",
+        "openai"
+      ],
+      "classification": {
+        "stage": "evaluation",
+        "depth": "production",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Working with evals | OpenAI API",
+        "textHash": "9c0ea1ab34dfee7d1c9dfcc699d7923802be6a3c4bcf1a215c2e1a3e4fcddf04",
+        "rawCharCount": 568915,
+        "cleanedCharCount": 24391,
+        "wordLikeCount": 3632,
+        "sourceEvidence": "Responses Copy Page Responses Evaluations often called evals test model outputs to ensure they meet style and content",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "9f11fa0d71cd",
+      "title": "生产级 LLM 调用可靠性",
+      "competency": "生产排查",
+      "source": "openai_production_best_practices",
+      "sourceUrl": "https://platform.openai.com/docs/guides/production-best-practices",
+      "tags": [
+        "production",
+        "timeout",
+        "retry",
+        "rate-limit",
+        "cost",
+        "observability",
+        "生产排查",
+        "openai"
+      ],
+      "classification": {
+        "stage": "production",
+        "depth": "senior",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 98,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Production best practices | OpenAI API",
+        "textHash": "2924b1981c38d341d828b7ce9cdd1cdeceb8edeecc3523ef702a7a4946e30b12",
+        "rawCharCount": 337221,
+        "cleanedCharCount": 13557,
+        "wordLikeCount": 2227,
+        "sourceEvidence": "Copy Page This guide provides a comprehensive set of best practices to help you transition from prototype to",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "4b813b9bcd0f",
+      "title": "AI 应用安全评估与缓解",
+      "competency": "AI 安全",
+      "source": "openai_safety_best_practices",
+      "sourceUrl": "https://platform.openai.com/docs/guides/safety-best-practices",
+      "tags": [
+        "safety",
+        "red-team",
+        "privacy",
+        "moderation",
+        "security-eval",
+        "ai 安全",
+        "openai"
+      ],
+      "classification": {
+        "stage": "safety",
+        "depth": "production",
+        "interviewUse": "rubric-evidence"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Safety best practices | OpenAI API",
+        "textHash": "cc9c19e97dff04887c0824ea8e72ab7f2ec22d6190066efd9b0891cd518adf34",
+        "rawCharCount": 323108,
+        "cleanedCharCount": 6278,
+        "wordLikeCount": 975,
+        "sourceEvidence": "Copy Page Use our free Moderation API OpenAI s Moderation API is free-to-use and can help reduce the",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "0c23fba8f914",
+      "title": "Stateful Agent 工作流",
+      "competency": "Agent 工具调用",
+      "source": "langgraph_overview",
+      "sourceUrl": "https://docs.langchain.com/oss/javascript/langgraph/overview",
+      "tags": [
+        "langgraph",
+        "agent",
+        "workflow",
+        "checkpoint",
+        "state-machine",
+        "agent 工具调用",
+        "langchain"
+      ],
+      "classification": {
+        "stage": "agent",
+        "depth": "senior",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 98,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "LangGraph overview - Docs by LangChain",
+        "textHash": "0edd51da7f753178b30664b0bfc1f2c2b6615f5274b1c716d16f72a71091882c",
+        "rawCharCount": 1052053,
+        "cleanedCharCount": 4907,
+        "wordLikeCount": 663,
+        "sourceEvidence": "Trusted by companies shaping the future of agents including Klarna Uber J P",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "820fd72b31ac",
+      "title": "面试流程的条件路由与中断恢复",
+      "competency": "对话状态管理",
+      "source": "langgraph_overview",
+      "sourceUrl": "https://docs.langchain.com/oss/javascript/langgraph/overview",
+      "tags": [
+        "langgraph",
+        "conditional-routing",
+        "checkpoint",
+        "session-state",
+        "agent 工具调用",
+        "langchain"
+      ],
+      "classification": {
+        "stage": "agent",
+        "depth": "senior",
+        "interviewUse": "follow-up"
+      },
+      "quality": {
+        "score": 98,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "LangGraph overview - Docs by LangChain",
+        "textHash": "0edd51da7f753178b30664b0bfc1f2c2b6615f5274b1c716d16f72a71091882c",
+        "rawCharCount": 1052053,
+        "cleanedCharCount": 4907,
+        "wordLikeCount": 663,
+        "sourceEvidence": "Morgan and more LangGraph is a low-level orchestration framework and runtime for building managing and deploying long-running stateful",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "653960f096a3",
+      "title": "RAG 应用链路与组件",
+      "competency": "RAG 数据治理",
+      "source": "langchain_rag",
+      "sourceUrl": "https://docs.langchain.com/oss/javascript/langchain/rag",
+      "tags": [
+        "rag",
+        "ingestion",
+        "retrieval",
+        "metadata",
+        "generation",
+        "rag 数据治理",
+        "langchain"
+      ],
+      "classification": {
+        "stage": "ingestion",
+        "depth": "foundation",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Build a RAG agent with LangChain - Docs by LangChain",
+        "textHash": "1228a7927de3787abfb54e697fdf1a720f1f260fe4ae59921044060268bcc589",
+        "rawCharCount": 2581950,
+        "cleanedCharCount": 24185,
+        "wordLikeCount": 3279,
+        "sourceEvidence": "These applications use a technique known as Retrieval Augmented Generation or RAG",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "8b5ddf28a766",
+      "title": "Agent Trace 与线上排障",
+      "competency": "生产排查",
+      "source": "langsmith_observability",
+      "sourceUrl": "https://docs.langchain.com/langsmith/observability",
+      "tags": [
+        "observability",
+        "trace",
+        "langsmith",
+        "bad-case",
+        "latency",
+        "生产排查",
+        "langchain"
+      ],
+      "classification": {
+        "stage": "production",
+        "depth": "senior",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 98,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "LangSmith Observability - Docs by LangChain",
+        "textHash": "898ac7030518eda01c1b9513f85851d08667e20b20b84a58996d3f40c7ff1494",
+        "rawCharCount": 952796,
+        "cleanedCharCount": 1522,
+        "wordLikeCount": 212,
+        "sourceEvidence": "LangSmith Observability provides full visibility into your LLM application from individual traces to production-wide performance metrics",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "4f9eaa1658b3",
+      "title": "生产级 RAG 数据摄取与调优",
+      "competency": "RAG 数据治理",
+      "source": "llamaindex_production_rag",
+      "sourceUrl": "https://docs.llamaindex.ai/en/stable/optimizing/production_rag/",
+      "tags": [
+        "production-rag",
+        "chunking",
+        "metadata",
+        "incremental-indexing",
+        "data-quality",
+        "rag 数据治理",
+        "llamaindex"
+      ],
+      "classification": {
+        "stage": "ingestion",
+        "depth": "senior",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 92,
+        "reasons": [
+          "vendor-docs",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Building Performant RAG Applications for Production | Developer Documentation",
+        "textHash": "50b8bfb45f4747311e30f542a86fdf5d1b0b977f5ebcc6527932857018ad77fc",
+        "rawCharCount": 245226,
+        "cleanedCharCount": 6513,
+        "wordLikeCount": 985,
+        "sourceEvidence": "Resources Metadata Replacement Postprocessor Structured Retrieval for Larger Document SetsSection titled Structured Retrieval for Larger Document Sets Motivatio",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "1bc7b6ae0c18",
+      "title": "面试题库采集清洗与标签治理",
+      "competency": "RAG 数据治理",
+      "source": "llamaindex_production_rag",
+      "sourceUrl": "https://docs.llamaindex.ai/en/stable/optimizing/production_rag/",
+      "tags": [
+        "interview-bank",
+        "collection",
+        "cleaning",
+        "chunking",
+        "tags",
+        "metadata",
+        "quality-score",
+        "rag 数据治理",
+        "llamaindex"
+      ],
+      "classification": {
+        "stage": "ingestion",
+        "depth": "senior",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 92,
+        "reasons": [
+          "vendor-docs",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Building Performant RAG Applications for Production | Developer Documentation",
+        "textHash": "50b8bfb45f4747311e30f542a86fdf5d1b0b977f5ebcc6527932857018ad77fc",
+        "rawCharCount": 245226,
+        "cleanedCharCount": 6513,
+        "wordLikeCount": 985,
+        "sourceEvidence": "Resources Metadata Replacement Postprocessor Structured Retrieval for Larger Document SetsSection titled Structured Retrieval for Larger Document Sets Motivatio",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "abfb343a8822",
+      "title": "检索质量与回答质量分层评估",
+      "competency": "RAG 评估",
+      "source": "llamaindex_evaluating",
+      "sourceUrl": "https://docs.llamaindex.ai/en/stable/module_guides/evaluating/",
+      "tags": [
+        "rag-evaluation",
+        "retrieval-eval",
+        "faithfulness",
+        "llm-judge",
+        "golden-set",
+        "rag 评估",
+        "llamaindex"
+      ],
+      "classification": {
+        "stage": "evaluation",
+        "depth": "senior",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 92,
+        "reasons": [
+          "vendor-docs",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Evaluating | Developer Documentation",
+        "textHash": "07c75ea0a7662b55334805b947a97cbcc7d3d8ccf04145f70590ce0911efae85",
+        "rawCharCount": 252606,
+        "cleanedCharCount": 3707,
+        "wordLikeCount": 518,
+        "sourceEvidence": "Faithfulness Evaluates if the answer is faithful to the retrieved contexts in other words whether if there s",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "e69bef778816",
+      "title": "两阶段召回与 Rerank",
+      "competency": "向量检索",
+      "source": "pinecone_rerankers",
+      "sourceUrl": "https://www.pinecone.io/learn/series/rag/rerankers/",
+      "tags": [
+        "rerank",
+        "two-stage-retrieval",
+        "cross-encoder",
+        "context-compression",
+        "向量检索",
+        "pinecone"
+      ],
+      "classification": {
+        "stage": "retrieval",
+        "depth": "senior",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 88,
+        "reasons": [
+          "engineering-article",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Rerankers and Two-Stage Retrieval | Pinecone",
+        "textHash": "8387724bd0766b2f5a7f775af26e4943127dcfd3747891f1b4106711a8c299a8",
+        "rawCharCount": 310272,
+        "cleanedCharCount": 15483,
+        "wordLikeCount": 2459,
+        "sourceEvidence": "Rerankers and Two-Stage RetrievalJump to section Recall vs",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "dcbc3f5b1d05",
+      "title": "BM25 与向量混合检索",
+      "competency": "向量检索",
+      "source": "azure_hybrid_search",
+      "sourceUrl": "https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview",
+      "tags": [
+        "hybrid-search",
+        "bm25",
+        "dense-vector",
+        "metadata-filter",
+        "fusion",
+        "向量检索",
+        "microsoft"
+      ],
+      "classification": {
+        "stage": "retrieval",
+        "depth": "production",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Hybrid Search Overview - Azure AI Search | Microsoft Learn",
+        "textHash": "27ee5daee8ec4bb401b6bf9913e83b5206854c07e6c31d705730aa2afb39115f",
+        "rawCharCount": 55437,
+        "cleanedCharCount": 7543,
+        "wordLikeCount": 1088,
+        "sourceEvidence": "Merges results from each query by using Reciprocal Rank Fusion RRF",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "c9ca4972dda2",
+      "title": "向量索引与过滤设计",
+      "competency": "向量检索",
+      "source": "azure_vector_search",
+      "sourceUrl": "https://learn.microsoft.com/en-us/azure/search/vector-search-overview",
+      "tags": [
+        "vector-index",
+        "acl",
+        "metadata-filter",
+        "versioning",
+        "tenant",
+        "向量检索",
+        "microsoft"
+      ],
+      "classification": {
+        "stage": "retrieval",
+        "depth": "production",
+        "interviewUse": "follow-up"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Vector Search Overview - Azure AI Search | Microsoft Learn",
+        "textHash": "7e78fe71dcbb939504017bc26a130f29686ad6e6d510ec5eb615f3d7ebff40cc",
+        "rawCharCount": 59590,
+        "cleanedCharCount": 7814,
+        "wordLikeCount": 1228,
+        "sourceEvidence": "Table of contents Exit editor mode Ask Learn Ask Learn Reading mode Table of contents Read in English",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "cd3a92984116",
+      "title": "pgvector 索引、维度与重建",
+      "competency": "向量检索",
+      "source": "pgvector_indexing",
+      "sourceUrl": "https://github.com/pgvector/pgvector",
+      "tags": [
+        "pgvector",
+        "hnsw",
+        "ivfflat",
+        "embedding-dimensions",
+        "index-rebuild",
+        "向量检索"
+      ],
+      "classification": {
+        "stage": "retrieval",
+        "depth": "production",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 79,
+        "reasons": [
+          "coverage-reference",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "GitHub - pgvector/pgvector: Open-source vector similarity search for Postgres · GitHub",
+        "textHash": "44cc095cfa10301efc318f9e6dd5a970de55d26819a1d4f2dc5f8aa19f978cfd",
+        "rawCharCount": 710625,
+        "cleanedCharCount": 33691,
+        "wordLikeCount": 5133,
+        "sourceEvidence": "pgvector pgvector Public Notifications You must be signed in to change notification settings Fork 1 2k Star 21",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "1d59e6eb2c1b",
+      "title": "Dense/Sparse Hybrid 与多路召回",
+      "competency": "向量检索",
+      "source": "qdrant_hybrid_queries",
+      "sourceUrl": "https://qdrant.tech/documentation/concepts/hybrid-queries/",
+      "tags": [
+        "hybrid-search",
+        "sparse-vector",
+        "dense-vector",
+        "fusion",
+        "multi-retrieval",
+        "向量检索",
+        "qdrant"
+      ],
+      "classification": {
+        "stage": "retrieval",
+        "depth": "senior",
+        "interviewUse": "follow-up"
+      },
+      "quality": {
+        "score": 92,
+        "reasons": [
+          "vendor-docs",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Hybrid Queries - Qdrant",
+        "textHash": "2b39766525f9fbdd028e1034b3f763cbeb78462f6383227fbdf86f4892acda6e",
+        "rawCharCount": 338742,
+        "cleanedCharCount": 39876,
+        "wordLikeCount": 5278,
+        "sourceEvidence": "DocumentationSearchHybrid QueriesHybrid and Multi-Stage QueriesAvailable as of v1 10 0With the introduction of multiple named vectors per point",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "e6b540eb35d2",
+      "title": "Agent 简单优先与可控编排",
+      "competency": "Agent 工具调用",
+      "source": "anthropic_effective_agents",
+      "sourceUrl": "https://www.anthropic.com/engineering/building-effective-agents",
+      "tags": [
+        "agent",
+        "workflow",
+        "tool-use",
+        "human-in-the-loop",
+        "observability",
+        "agent 工具调用",
+        "anthropic"
+      ],
+      "classification": {
+        "stage": "agent",
+        "depth": "senior",
+        "interviewUse": "rubric-evidence"
+      },
+      "quality": {
+        "score": 88,
+        "reasons": [
+          "engineering-article",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Building Effective AI Agents \\ Anthropic",
+        "textHash": "0c300f639f71f02a0db6d7818884ac746cefb4c88659c37bdf3b5ba547851998",
+        "rawCharCount": 180352,
+        "cleanedCharCount": 18228,
+        "wordLikeCount": 2750,
+        "sourceEvidence": "Engineering at AnthropicBuilding effective agentsPublished Dec 19 2024We ve worked with dozens of teams building LLM agents across",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "02060a6b7b8d",
+      "title": "MCP 工具协议与能力发现",
+      "competency": "Agent 工具调用",
+      "source": "mcp_tools",
+      "sourceUrl": "https://modelcontextprotocol.io/docs/concepts/tools",
+      "tags": [
+        "mcp",
+        "tool-protocol",
+        "capability-discovery",
+        "remote-tools",
+        "authorization",
+        "agent 工具调用",
+        "model context protocol"
+      ],
+      "classification": {
+        "stage": "agent",
+        "depth": "senior",
+        "interviewUse": "follow-up"
+      },
+      "quality": {
+        "score": 98,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Tools - Model Context Protocol",
+        "textHash": "02ee4a09d1cfd2be15a070b4759091e85425898caf9a892dd97093cac8f5a95f",
+        "rawCharCount": 721144,
+        "cleanedCharCount": 8028,
+        "wordLikeCount": 1056,
+        "sourceEvidence": "The Model Context Protocol MCP allows servers to expose tools that can be invoked by language models",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "271192332986",
+      "title": "企业级 RAG 设计与评估",
+      "competency": "RAG 评估",
+      "source": "microsoft_rag_design",
+      "sourceUrl": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide",
+      "tags": [
+        "rag-evaluation",
+        "enterprise",
+        "quality-gate",
+        "rollback",
+        "feedback-loop",
+        "rag 评估",
+        "microsoft"
+      ],
+      "classification": {
+        "stage": "evaluation",
+        "depth": "senior",
+        "interviewUse": "rubric-evidence"
+      },
+      "quality": {
+        "score": 98,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Design and Develop a RAG Solution - Azure Architecture Center | Microsoft Learn",
+        "textHash": "503fa58c79a81e1590846960bf1d3d0e8fd4398e98acb67272df5210da41cd36",
+        "rawCharCount": 57788,
+        "cleanedCharCount": 7926,
+        "wordLikeCount": 1183,
+        "sourceEvidence": "Table of contents Exit editor mode Ask Learn Ask Learn Reading mode Table of contents Read in English",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "f983e5e49c9f",
+      "title": "LLM 应用安全风险",
+      "competency": "AI 安全",
+      "source": "owasp_llm_top_10",
+      "sourceUrl": "https://genai.owasp.org/llm-top-10/",
+      "tags": [
+        "owasp",
+        "llm-security",
+        "prompt-injection",
+        "data-leakage",
+        "tool-permissions",
+        "ai 安全"
+      ],
+      "classification": {
+        "stage": "safety",
+        "depth": "production",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "LLMRisks Archive - OWASP Gen AI Security Project",
+        "textHash": "cf1cd6a40e73f0aaa343e838d3cecb338fec7e76c79b75bc0bee9f2376e7b71f",
+        "rawCharCount": 911532,
+        "cleanedCharCount": 1506,
+        "wordLikeCount": 240,
+        "sourceEvidence": "A Prompt Injection Vulnerability occurs when user prompts alter the Read More Sensitive information can affect both the",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "7abaa68027b0",
+      "title": "AI 风险治理与责任闭环",
+      "competency": "AI 安全",
+      "source": "nist_ai_rmf",
+      "sourceUrl": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "tags": [
+        "ai-risk",
+        "governance",
+        "fairness",
+        "audit",
+        "human-review",
+        "ai 安全",
+        "nist"
+      ],
+      "classification": {
+        "stage": "safety",
+        "depth": "senior",
+        "interviewUse": "follow-up"
+      },
+      "quality": {
+        "score": 90,
+        "reasons": [
+          "authoritative-source",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "AI Risk Management Framework | NIST",
+        "textHash": "d21720942f634a6f16952ac49fa3396e70852d9ce7cc82ab5dc77743d4c736c1",
+        "rawCharCount": 91464,
+        "cleanedCharCount": 591,
+        "wordLikeCount": 87,
+        "sourceEvidence": "New guidance seeks to cultivate trust in AI technologies and promote AI innovation while mitigating risk",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "eb0cb73149a6",
+      "title": "AI 前端流式协议",
+      "competency": "AI 前端工程",
+      "source": "developer_experience_streaming",
+      "sourceUrl": "https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events",
+      "tags": [
+        "sse",
+        "streaming",
+        "frontend",
+        "partial-response",
+        "idempotency",
+        "ai 前端工程",
+        "mdn web docs"
+      ],
+      "classification": {
+        "stage": "frontend",
+        "depth": "production",
+        "interviewUse": "core-question"
+      },
+      "quality": {
+        "score": 93,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "Server-sent events - Web APIs | MDN",
+        "textHash": "fc8aaedae2c0fe9b0cfc36997e8db16a877418c0138f7c0afbe3d7cfe3929a46",
+        "rawCharCount": 145879,
+        "cleanedCharCount": 1484,
+        "wordLikeCount": 234,
+        "sourceEvidence": "Examples Simple SSE demo using PHP Specifications Specification HTML server-sent-events See also Tools Mercure a real-time communication protocol",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "fda26e12f40c",
+      "title": "WebSocket 与双向 Agent 交互",
+      "competency": "AI 前端工程",
+      "source": "mdn_websocket",
+      "sourceUrl": "https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API",
+      "tags": [
+        "websocket",
+        "realtime",
+        "frontend-state",
+        "auth",
+        "reconnect",
+        "ai 前端工程",
+        "mdn web docs"
+      ],
+      "classification": {
+        "stage": "frontend",
+        "depth": "senior",
+        "interviewUse": "follow-up"
+      },
+      "quality": {
+        "score": 98,
+        "reasons": [
+          "authoritative-source",
+          "source-page-fetched-and-cleaned",
+          "senior-depth",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "WebSocket API (WebSockets) - Web APIs | MDN",
+        "textHash": "39e82604d4661d45476d86c7606b05c4f4453a963b284433fc77fafe10ed8c63",
+        "rawCharCount": 159357,
+        "cleanedCharCount": 6684,
+        "wordLikeCount": 999,
+        "sourceEvidence": "WebSocket API WebSockets Note This feature is available in Web Workers",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    },
+    {
+      "id": "ab22acd59350",
+      "title": "公开题型覆盖校准",
+      "competency": "系统设计",
+      "source": "llm_interview_questions",
+      "sourceUrl": "https://github.com/llmgenai/LLMInterviewQuestions",
+      "tags": [
+        "interview-bank",
+        "coverage",
+        "copyright-safe",
+        "calibration",
+        "question-design",
+        "系统设计",
+        "llmgenai"
+      ],
+      "classification": {
+        "stage": "system-design",
+        "depth": "production",
+        "interviewUse": "calibration"
+      },
+      "quality": {
+        "score": 79,
+        "reasons": [
+          "coverage-reference",
+          "source-page-fetched-and-cleaned",
+          "rubric-and-tags-complete"
+        ]
+      },
+      "textStats": {
+        "extractedTitle": "GitHub - llmgenai/LLMInterviewQuestions: This repository contains LLM (Large language model) interview question asked in top companies like Google, Nvidia , Meta , Microsoft & fortune 500 companies. · GitHub",
+        "textHash": "8da5e7606761637476c8062dbadf36cb397f81c3fddd3d6f4ceaf7a25b2a5f93",
+        "rawCharCount": 317894,
+        "cleanedCharCount": 10445,
+        "wordLikeCount": 1638,
+        "sourceEvidence": "llmgenai LLMInterviewQuestions Public Notifications You must be signed in to change notification settings Fork 384 Star 1 8k",
+        "fetchOk": true,
+        "fetchStatus": 200
+      }
+    }
+  ]
+}

@@ -142,5 +142,101 @@
     "expectedScore": 46,
     "answer": "做一个聊天页面，用户上传简历后把简历内容发给大模型，让大模型扮演面试官提问，最后让大模型打分即可。",
     "rationale": "只是 demo 方案，不具备企业级题库、数据治理、可观测性和评分校准。"
+  },
+  {
+    "id": "cal_rag_data_high_004",
+    "questionId": "rag_data_004",
+    "quality": "excellent",
+    "expectedScore": 92,
+    "answer": "我会先建立白名单来源和版权策略，只保存改写知识块、source URL、hash、短 evidence，不保存整页原文。解析层按网页、PDF、DOCX 使用不同 loader，去掉 nav/footer/script 等噪声，统一空白，做语言和长度校验。切分时保留标题层级，按语义段落生成 chunk，并写入 roleId、competency、tags、sourceId、sourceUrl、publisher、license、version、owner、collectedAt、qualityScore。入库前做重复 hash、低质量过滤和人工审核状态；入库后用 golden query 验证 recall@k 和评分引用是否改善。",
+    "rationale": "完整覆盖来源治理、清洗、切分、标签、质量和召回验证。"
+  },
+  {
+    "id": "cal_rag_data_mid_004",
+    "questionId": "rag_data_004",
+    "quality": "acceptable",
+    "expectedScore": 74,
+    "answer": "我会爬取官方文档和高质量文章，提取正文后按标题切块，给每个块加上来源 URL、标签和能力项，然后生成 embedding 写入向量库。更新时重新跑采集和入库。",
+    "rationale": "方向正确，但缺少版权策略、清洗细节、质量评分、审核状态和评估闭环。"
+  },
+  {
+    "id": "cal_rag_data_low_004",
+    "questionId": "rag_data_004",
+    "quality": "poor",
+    "expectedScore": 39,
+    "answer": "直接在网上搜一些 AI 面试题，把网页内容复制到一个 markdown，然后全部 embedding 到向量数据库里就可以了。",
+    "rationale": "缺少来源治理、版权意识、清洗、切分、metadata、质量校验和审核。"
+  },
+  {
+    "id": "cal_vector_high_004",
+    "questionId": "vector_004",
+    "quality": "excellent",
+    "expectedScore": 91,
+    "answer": "只用向量 topK 容易漏掉专有名词、错误码、API 字段和精确术语。BM25 适合关键词精确匹配，dense vector 适合语义泛化，sparse vector 可以补充词项权重。线上我会先扩大候选集，再用 reranker 精排，最后去重和压缩上下文。是否上线 rerank 要看 recall@k、NDCG、faithfulness、P95 延迟和成本；如果候选集已经很小或延迟预算不足，rerank 可能不划算。",
+    "rationale": "准确解释混合检索、rerank、质量/延迟/成本和评估指标。"
+  },
+  {
+    "id": "cal_vector_mid_004",
+    "questionId": "vector_004",
+    "quality": "acceptable",
+    "expectedScore": 73,
+    "answer": "向量检索可以找语义相似，BM25 可以匹配关键词，两者结合会更稳。rerank 可以重新排序结果，但会增加耗时。可以通过 recall 和人工测试看效果。",
+    "rationale": "基本理解正确，但缺少 fusion、metadata filter、上下文预算和具体评估设计。"
+  },
+  {
+    "id": "cal_vector_low_004",
+    "questionId": "vector_004",
+    "quality": "poor",
+    "expectedScore": 36,
+    "answer": "现在 embedding 已经很强了，直接 topK 取前几个就好。BM25 是传统搜索，没必要加。rerank 也只是再排序，意义不大。",
+    "rationale": "过度相信向量检索，忽略关键词、混合召回、rerank 和评估。"
+  },
+  {
+    "id": "cal_prod_high_004",
+    "questionId": "prod_004",
+    "quality": "excellent",
+    "expectedScore": 93,
+    "answer": "trace 至少包括 requestId、sessionId、userId/tenantId、roleId、questionId、promptVersion、model、temperature、embeddingModel、indexVersion、retrievedChunkIds、vectorScores、rerankScores、toolCalls、rubricId、judgePromptVersion、scoreResult、tokenUsage、latencyBreakdown、providerErrors 和 userFeedback。候选人姓名、邮箱、电话要脱敏或分级权限查看。排查低质量评分时我会回放检索、prompt、judge 输出和校准样本，并把坏例加入 eval。",
+    "rationale": "字段完整，覆盖隐私、RAG、judge、版本、延迟、错误和坏例回流。"
+  },
+  {
+    "id": "cal_prod_mid_004",
+    "questionId": "prod_004",
+    "quality": "acceptable",
+    "expectedScore": 75,
+    "answer": "我会记录 session id、用户问题、模型回答、使用的模型、检索到的文档、分数、耗时和错误。出现低质量评分时看检索结果是否相关，再看 prompt 和模型输出。",
+    "rationale": "有基本 trace 意识，但缺少版本、rerank、token、judge、隐私脱敏和 eval 回流。"
+  },
+  {
+    "id": "cal_prod_low_004",
+    "questionId": "prod_004",
+    "quality": "poor",
+    "expectedScore": 42,
+    "answer": "记录接口日志和最终分数就够了。如果评分不准，可以让模型重新打一次分。",
+    "rationale": "缺少排障所需的中间链路、版本、检索、prompt、隐私和校准信息。"
+  },
+  {
+    "id": "cal_safety_high_004",
+    "questionId": "safety_004",
+    "quality": "excellent",
+    "expectedScore": 92,
+    "answer": "我会把评分公平性作为产品治理问题：定义能力项和 rubric，定期抽样人工复核，按岗位、级别、题型、候选人背景等维度看分布和异常；简历 PII 做最小化和脱敏，评分报告保留可审计证据但限制访问。候选人可以申诉，人工复核能看到题目、回答、rubric、模型版本和 trace。发布新题库或 judge prompt 前必须跑偏差和一致性 eval，并有风险 owner 和事故响应流程。",
+    "rationale": "覆盖公平性、隐私、申诉、人工复核、版本发布和治理责任。"
+  },
+  {
+    "id": "cal_safety_mid_004",
+    "questionId": "safety_004",
+    "quality": "acceptable",
+    "expectedScore": 74,
+    "answer": "需要保护候选人隐私，敏感字段脱敏，评分最好有人工复核。可以让候选人查看报告并提出异议，系统记录面试过程方便审核。",
+    "rationale": "方向正确，但缺少公平性指标、偏差评估、访问控制和发布门槛。"
+  },
+  {
+    "id": "cal_safety_low_004",
+    "questionId": "safety_004",
+    "quality": "poor",
+    "expectedScore": 37,
+    "answer": "模型评分应该比较客观，只要 prompt 写得公平就行。隐私方面不要在页面展示手机号即可，申诉可以人工看一下。",
+    "rationale": "过度信任模型，治理措施薄弱，缺少系统性公平性评估和审计。"
   }
 ]

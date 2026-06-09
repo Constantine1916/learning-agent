@@ -3,7 +3,25 @@
     "id": "openai_prompt_engineering",
     "title": "OpenAI Prompt Engineering Guide",
     "url": "https://platform.openai.com/docs/guides/prompt-engineering",
-    "usage": "用于提炼 prompt 指令层级、上下文组织、输出格式和评估改进方向。"
+    "usage": "用于提炼 prompt 指令层级、上下文组织、输出格式、注入防护和评估改进方向。"
+  },
+  {
+    "id": "openai_structured_outputs",
+    "title": "OpenAI Structured Outputs Guide",
+    "url": "https://platform.openai.com/docs/guides/structured-outputs",
+    "usage": "用于提炼严格 schema 输出、JSON 校验、结构化评分和可恢复错误处理。"
+  },
+  {
+    "id": "openai_function_calling",
+    "title": "OpenAI Function Calling Guide",
+    "url": "https://platform.openai.com/docs/guides/function-calling",
+    "usage": "用于提炼工具 schema、参数校验、权限上下文、幂等和审计能力点。"
+  },
+  {
+    "id": "openai_tools",
+    "title": "OpenAI Tools Guide",
+    "url": "https://platform.openai.com/docs/guides/tools",
+    "usage": "用于提炼内置工具、业务工具、工具结果上下文隔离和成本控制边界。"
   },
   {
     "id": "openai_embeddings",
@@ -18,10 +36,22 @@
     "usage": "用于提炼 LLM 应用评估、自动化测试、评分校准和回归验证方法。"
   },
   {
+    "id": "openai_production_best_practices",
+    "title": "OpenAI Production Best Practices",
+    "url": "https://platform.openai.com/docs/guides/production-best-practices",
+    "usage": "用于提炼生产级 LLM 调用可靠性、超时重试、成本延迟、灰度和回滚。"
+  },
+  {
+    "id": "openai_safety_best_practices",
+    "title": "OpenAI Safety Best Practices",
+    "url": "https://platform.openai.com/docs/guides/safety-best-practices",
+    "usage": "用于提炼安全 eval、红队样本、隐私保护、输出过滤和人工复核。"
+  },
+  {
     "id": "langgraph_overview",
     "title": "LangGraph Overview",
     "url": "https://docs.langchain.com/oss/javascript/langgraph/overview",
-    "usage": "用于设计 stateful workflow、节点、边、状态和 checkpoint 类面试流程。"
+    "usage": "用于设计 stateful workflow、节点、边、状态、checkpoint 和中断恢复类面试流程。"
   },
   {
     "id": "langchain_rag",
@@ -30,10 +60,64 @@
     "usage": "用于提炼 RAG ingestion、retrieval、generation 和应用集成能力点。"
   },
   {
+    "id": "langsmith_observability",
+    "title": "LangSmith Observability",
+    "url": "https://docs.langchain.com/langsmith/observability",
+    "usage": "用于提炼 Agent/RAG trace、线上排障、坏例回流和可观测性指标。"
+  },
+  {
+    "id": "llamaindex_production_rag",
+    "title": "LlamaIndex Production RAG",
+    "url": "https://docs.llamaindex.ai/en/stable/optimizing/production_rag/",
+    "usage": "用于提炼生产级 RAG 数据摄取、chunking、metadata、增量更新和调优流程。"
+  },
+  {
+    "id": "llamaindex_evaluating",
+    "title": "LlamaIndex Evaluating Guide",
+    "url": "https://docs.llamaindex.ai/en/stable/module_guides/evaluating/",
+    "usage": "用于提炼检索质量、上下文质量、回答质量和 LLM judge 校准方法。"
+  },
+  {
+    "id": "pinecone_rerankers",
+    "title": "Pinecone Rerankers for RAG",
+    "url": "https://www.pinecone.io/learn/series/rag/rerankers/",
+    "usage": "用于提炼两阶段召回、rerank、上下文压缩和质量/延迟/成本权衡。"
+  },
+  {
+    "id": "azure_hybrid_search",
+    "title": "Azure AI Search Hybrid Search Overview",
+    "url": "https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview",
+    "usage": "用于提炼 BM25、向量检索、metadata filter、fusion 和 hybrid search 评估。"
+  },
+  {
+    "id": "azure_vector_search",
+    "title": "Azure AI Search Vector Search Overview",
+    "url": "https://learn.microsoft.com/en-us/azure/search/vector-search-overview",
+    "usage": "用于提炼向量索引、过滤字段、tenant/ACL/version metadata 和权限过滤。"
+  },
+  {
+    "id": "pgvector_indexing",
+    "title": "pgvector README",
+    "url": "https://github.com/pgvector/pgvector",
+    "usage": "用于提炼 pgvector 维度、相似度操作符、HNSW/IVFFlat 索引和重建策略。"
+  },
+  {
+    "id": "qdrant_hybrid_queries",
+    "title": "Qdrant Hybrid Queries",
+    "url": "https://qdrant.tech/documentation/concepts/hybrid-queries/",
+    "usage": "用于提炼 dense/sparse hybrid、多路召回、fusion、rerank 和权限过滤顺序。"
+  },
+  {
     "id": "anthropic_effective_agents",
     "title": "Anthropic Building Effective Agents",
     "url": "https://www.anthropic.com/engineering/building-effective-agents",
     "usage": "用于提炼 Agent workflow、工具使用、简单优先、可控编排和评估原则。"
+  },
+  {
+    "id": "mcp_tools",
+    "title": "Model Context Protocol Tools",
+    "url": "https://modelcontextprotocol.io/docs/concepts/tools",
+    "usage": "用于提炼工具发现、工具协议、远程工具授权、确认和审计设计。"
   },
   {
     "id": "microsoft_rag_design",
@@ -48,9 +132,27 @@
     "usage": "用于提炼 prompt injection、敏感信息、工具越权和 AI 安全治理题目。"
   },
   {
+    "id": "nist_ai_rmf",
+    "title": "NIST AI Risk Management Framework",
+    "url": "https://www.nist.gov/itl/ai-risk-management-framework",
+    "usage": "用于提炼 AI 风险治理、责任闭环、公平性、审计和人工复核。"
+  },
+  {
+    "id": "developer_experience_streaming",
+    "title": "MDN Server-sent events",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events",
+    "usage": "用于提炼 SSE、AI 前端 streaming、partial response、取消和 session 一致性。"
+  },
+  {
+    "id": "mdn_websocket",
+    "title": "MDN WebSocket API",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API",
+    "usage": "用于提炼 WebSocket 双向实时交互、重连、心跳、鉴权和状态同步。"
+  },
+  {
     "id": "llm_interview_questions",
     "title": "llmgenai/LLMInterviewQuestions",
     "url": "https://github.com/llmgenai/LLMInterviewQuestions",
-    "usage": "仅用于公开面试题型覆盖参考，最终题目均重新整理改写。"
+    "usage": "仅用于公开面试题型覆盖参考，最终题目均重新整理改写，不复制原题。"
   }
 ]

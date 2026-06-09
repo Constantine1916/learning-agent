@@ -117,6 +117,7 @@ sources.json              # 公开资料来源和使用说明
 knowledge.md              # RAG 参考知识库
 collected-knowledge.jsonl # 采集后整理的来源知识块
 collected-knowledge.md    # 采集知识块的人类可读版本
+collected-knowledge-report.json # 采集清洗、分类、质量和来源统计报告
 ```
 
 结构化题库和 RAG 知识库是两层：
@@ -137,7 +138,7 @@ npm run collect:knowledge
 npm run ingest:knowledge
 ```
 
-采集脚本只保存基于官方/高质量来源改写整理的知识块、来源 URL、标题、能力项、license/usage 说明和短证据片段，不保存整页原文。
+采集脚本只保存基于官方/高质量来源改写整理的知识块、来源 URL、标题、能力项、tags、classification、quality score、license/usage 说明和短证据片段，不保存整页原文。`collected-knowledge-report.json` 会记录来源数量、失败来源、清洗策略、能力项分布、阶段分布和每个 chunk 的质量 metadata。
 
 校准评分样本：
 
