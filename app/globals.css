@@ -169,6 +169,11 @@ input {
   margin-top: 28px;
 }
 
+.start-options {
+  display: grid;
+  gap: 16px;
+}
+
 .upload-card {
   padding: 26px;
   display: flex;
@@ -181,13 +186,30 @@ input {
     var(--surface);
 }
 
-.upload-card strong {
+.practice-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(15, 159, 122, 0.1), transparent 44%),
+    var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.upload-card strong,
+.practice-card strong {
   color: var(--text-strong);
   font-size: 22px;
 }
 
-.upload-card small {
+.upload-card small,
+.practice-card small {
   color: var(--text-muted);
+  line-height: 1.45;
 }
 
 .upload-card input {
@@ -256,6 +278,25 @@ input {
 
 .competency-item.done strong {
   color: var(--accent-strong);
+}
+
+.mode-pill {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.mode-pill span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mode-pill strong {
+  color: var(--text-strong);
 }
 
 .interview-panel {
@@ -542,6 +583,7 @@ input {
   }
 
   .upload-card,
+  .practice-card,
   .result-score {
     grid-template-columns: 1fr;
   }

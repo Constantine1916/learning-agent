@@ -5,6 +5,7 @@ import {
   getEmbeddingProvider,
   getOllamaBaseUrl,
   getOllamaEmbeddingModel,
+  getOpenAIAPIKey,
   getOpenAIBaseUrl,
   getOpenAIEmbeddingModel,
   getOpenAIModel,
@@ -13,7 +14,7 @@ import {
 } from '@/lib/env'
 import { contentToText, parseJsonFromText } from '@/lib/agent/json'
 
-type ChatMessage = {
+export type ChatMessage = {
   role: 'system' | 'user' | 'assistant'
   content: string
 }
@@ -44,6 +45,88 @@ export async function invokeJson<T>(
   } catch (error) {
     console.warn('LLM JSON response failed validation; falling back to deterministic local result.', error)
     return fallback()
+  }
+}
+
+export async function* streamText(messages: ChatMessage[]): AsyncGenerator<string> {
+  const apiKey = getOpenAIAPIKey()
+  if (!apiKey) {
+    return
+  }
+
+  const baseUrl = (getOpenAIBaseUrl() || 'https://api.openai.com/v1').replace(/\/$/, '')
+  const response = await fetch(`${baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    signal: AbortSignal.timeout(getOpenAITimeoutMs()),
+    body: JSON.stringify({
+      model: getOpenAIModel(),
+      messages,
+      stream: true,
+    }),
+  })
+
+  if (!response.ok) {
+    const details = await response.text()
+    throw new Error(`LLM streaming request failed with ${response.status}: ${details}`)
+  }
+  if (!response.body) {
+    throw new Error('LLM streaming response did not include a body.')
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { value, done } = await reader.read()
+    if (done) {
+      break
+    }
+
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split(/\r?\n/)
+    buffer = lines.pop() ?? ''
+
+    for (const line of lines) {
+      const delta = parseStreamingLine(line)
+      if (delta) {
+        yield delta
+      }
+    }
+  }
+
+  const tailDelta = parseStreamingLine(buffer)
+  if (tailDelta) {
+    yield tailDelta
+  }
+}
+
+function parseStreamingLine(line: string): string {
+  const trimmed = line.trim()
+  if (!trimmed || trimmed.startsWith(':')) {
+    return ''
+  }
+
+  const payload = trimmed.startsWith('data:') ? trimmed.slice(5).trim() : trimmed
+  if (!payload || payload === '[DONE]') {
+    return ''
+  }
+
+  try {
+    const parsed = JSON.parse(payload) as {
+      choices?: Array<{
+        delta?: { content?: unknown }
+        message?: { content?: unknown }
+      }>
+    }
+    const content = parsed.choices?.[0]?.delta?.content ?? parsed.choices?.[0]?.message?.content
+    return typeof content === 'string' ? content : ''
+  } catch {
+    return ''
   }
 }
 

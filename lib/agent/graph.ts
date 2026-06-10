@@ -1,6 +1,6 @@
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { z } from 'zod'
-import { invokeJson } from '@/lib/agent/llm'
+import { invokeJson, type ChatMessage } from '@/lib/agent/llm'
 import { getCalibrationSamples, getInterviewBank, getQuestion, getRubric } from '@/lib/interview-bank/loader'
 import { selectInterviewQuestion } from '@/lib/interview-bank/planner'
 import type { BankQuestion, CalibrationSample, Rubric } from '@/lib/interview-bank/schemas'
@@ -47,6 +47,26 @@ const GraphState = Annotation.Root({
 
 type GraphInput = typeof GraphState.State
 
+export type StreamingInterviewQuestionPlan = {
+  question: InterviewQuestion
+  messages: ChatMessage[]
+}
+
+export type AnsweredQuestion = {
+  question: InterviewQuestion
+  answer: string
+}
+
+export type FullInterviewAssessment = {
+  scores: ScoreResult[]
+  report: FinalReport
+}
+
+const fullInterviewAssessmentSchema = z.object({
+  scores: z.array(scoreResultSchema),
+  report: finalReportSchema,
+})
+
 export async function runSelfIntroductionGraph(input: {
   session: InterviewSession
   resume: ResumeRecord
@@ -89,25 +109,187 @@ export async function runAnswerGraph(input: {
   return graph.invoke(input)
 }
 
+export async function retrieveInterviewKnowledge(input: {
+  session: InterviewSession
+  resume: ResumeRecord
+  selfIntro?: string
+  latestAnswer?: string
+}): Promise<KnowledgeChunk[]> {
+  const query = buildKnowledgeQuery(input)
+  return retrieveKnowledge(query)
+}
+
+export async function scoreInterviewAnswer(input: {
+  resume: ResumeRecord
+  answer: string
+  messages: InterviewMessage[]
+  chunks: KnowledgeChunk[]
+}): Promise<ScoreResult> {
+  return scoreCandidateAnswer({
+    question: findLatestQuestion(input.messages),
+    answer: input.answer,
+    resume: input.resume,
+    chunks: input.chunks,
+  })
+}
+
+export async function buildInterviewFinalReport(input: {
+  resume: ResumeRecord
+  scores: ScoreResult[]
+  messages: InterviewMessage[]
+}): Promise<FinalReport> {
+  return buildFinalReport(input)
+}
+
+export async function assessFullInterview(input: {
+  resume: ResumeRecord
+  messages: InterviewMessage[]
+  chunks: KnowledgeChunk[]
+}): Promise<FullInterviewAssessment> {
+  const answeredQuestions = extractAnsweredQuestions(input.messages)
+  if (answeredQuestions.length === 0) {
+    return fallbackFullInterviewAssessment([], input.chunks)
+  }
+
+  const bank = await getInterviewBank()
+  const assessment = await invokeJson(
+    [
+      {
+        role: 'system',
+        content:
+          '你是严谨的 AI 应用开发工程师终面评分官。请在面试全部答完后统一评分，逐题按 rubric 给分，并输出最终报告。只输出 JSON。',
+      },
+      {
+        role: 'user',
+        content: `请基于完整面试记录进行整体评分。要求：\n1. 为每道题输出一个 ScoreResult。\n2. 每题必须引用候选人回答中的具体证据，不要因为出现关键词就给高分。\n3. 最终报告要总结优势、短板和学习建议。\n4. 总分必须能反映能力项权重，80 分及以上 passed=true。\n\n候选人简历：${JSON.stringify(
+          input.resume.profile,
+        )}\n\n完整问答：${formatAnsweredQuestions(answeredQuestions)}\n\n评分依据：${formatAssessmentRubrics(
+          answeredQuestions,
+          bank,
+        )}\n\n最近召回的题库上下文：${formatChunks(input.chunks)}`,
+      },
+    ],
+    fullInterviewAssessmentSchema,
+    () => fallbackFullInterviewAssessment(answeredQuestions, input.chunks),
+  )
+
+  const normalizedScores = normalizeAssessmentScores(answeredQuestions, assessment.scores, input.chunks)
+  const weighted = await calculateWeightedScore(normalizedScores)
+  const report = finalReportSchema.parse({
+    ...assessment.report,
+    totalScore: weighted.totalScore,
+    passed: weighted.passed,
+    abilityRadar: weighted.abilityRadar,
+  })
+
+  return {
+    scores: normalizedScores,
+    report,
+  }
+}
+
+export async function prepareStreamingInterviewQuestion(input: {
+  resume: ResumeRecord
+  candidateProfile: CandidateProfile | null | undefined
+  chunks: KnowledgeChunk[]
+  messages: InterviewMessage[]
+  scores: ScoreResult[]
+  round: number
+}): Promise<StreamingInterviewQuestionPlan> {
+  const bank = await getInterviewBank()
+  const selected = selectInterviewQuestion({
+    bank,
+    resume: input.resume,
+    candidateProfile: input.candidateProfile,
+    messages: input.messages,
+    scores: input.scores,
+    round: input.round,
+  })
+  const question = bankQuestionToInterviewQuestion(selected.question, selected.competency.name, input.chunks)
+
+  return {
+    question,
+    messages: [
+      {
+        role: 'system',
+        content:
+          '你是一个真实的 AI 应用开发工程师面试官。请基于候选题生成下一轮面试问题正文。只输出问题本身，不要 JSON、Markdown、解释、评分或答案。',
+      },
+      {
+        role: 'user',
+        content: `第 ${input.round}/${TARGET_ROUNDS} 轮。请基于候选题生成一个有区分度的问题，避免重复历史问题。\n\n选题原因：${
+          selected.reason
+        }\n\n候选题：${formatBankQuestion(selected.question, selected.rubric)}\n\n候选人画像：${JSON.stringify(
+          input.candidateProfile,
+        )}\n\n简历：${JSON.stringify(input.resume.profile)}\n\n题库上下文：${formatChunks(
+          input.chunks,
+        )}\n\n历史消息：${formatMessages(input.messages)}\n\n历史评分：${JSON.stringify(input.scores)}`,
+      },
+    ],
+  }
+}
+
+export function materializeStreamingQuestion(plan: StreamingInterviewQuestionPlan, streamedText: string): InterviewQuestion {
+  const questionText = streamedText.trim() || plan.question.question
+  return {
+    ...plan.question,
+    question: questionText,
+  }
+}
+
+export function extractAnsweredQuestions(messages: InterviewMessage[]): AnsweredQuestion[] {
+  const answered: AnsweredQuestion[] = []
+  let activeQuestion: InterviewQuestion | null = null
+
+  for (const message of messages) {
+    if (message.role === 'interviewer' && message.metadata?.question) {
+      activeQuestion = questionSchema.parse(message.metadata.question)
+      continue
+    }
+
+    if (message.role === 'candidate' && activeQuestion && message.metadata?.kind !== 'self-introduction') {
+      answered.push({
+        question: activeQuestion,
+        answer: message.content,
+      })
+      activeQuestion = null
+    }
+  }
+
+  return answered
+}
+
 async function collectSelfIntroNode(state: GraphInput) {
   const candidateProfile = await createCandidateProfile(state.resume, state.selfIntro ?? '')
   return { candidateProfile }
 }
 
-async function retrieveKnowledgeNode(state: GraphInput) {
-  const query = [
-    state.resume.profile.summary,
-    state.resume.profile.skills.join(' '),
-    state.resume.profile.aiHighlights.join(' '),
-    state.selfIntro,
-    state.latestAnswer,
-    state.session.candidateProfile?.focusAreas.join(' '),
+function buildKnowledgeQuery(input: {
+  session: InterviewSession
+  resume: ResumeRecord
+  selfIntro?: string
+  latestAnswer?: string
+}): string {
+  return [
+    input.resume.profile.summary,
+    input.resume.profile.skills.join(' '),
+    input.resume.profile.aiHighlights.join(' '),
+    input.selfIntro,
+    input.latestAnswer,
+    input.session.candidateProfile?.focusAreas.join(' '),
   ]
     .filter(Boolean)
     .join('\n')
+}
 
+async function retrieveKnowledgeNode(state: GraphInput) {
   return {
-    retrievedChunks: await retrieveKnowledge(query),
+    retrievedChunks: await retrieveInterviewKnowledge({
+      session: state.session,
+      resume: state.resume,
+      selfIntro: state.selfIntro,
+      latestAnswer: state.latestAnswer,
+    }),
   }
 }
 
@@ -432,7 +614,56 @@ function fallbackFinalReport(scores: ScoreResult[], weighted?: WeightedScoreSumm
       scores.map((score) => ({
         competency: score.competency,
         score: score.score,
-      })),
+    })),
+  })
+}
+
+function fallbackFullInterviewAssessment(
+  answeredQuestions: AnsweredQuestion[],
+  chunks: KnowledgeChunk[],
+): FullInterviewAssessment {
+  const scores = answeredQuestions.map((item) =>
+    fallbackScore({
+      question: item.question,
+      answer: item.answer,
+      chunks,
+    }),
+  )
+
+  return {
+    scores,
+    report: fallbackFinalReport(scores),
+  }
+}
+
+function normalizeAssessmentScores(
+  answeredQuestions: AnsweredQuestion[],
+  scores: ScoreResult[],
+  chunks: KnowledgeChunk[],
+): ScoreResult[] {
+  return answeredQuestions.map((item, index) => {
+    const provided =
+      scores.find((score) => score.questionId === item.question.id) ??
+      scores[index] ??
+      fallbackScore({
+        question: item.question,
+        answer: item.answer,
+        chunks,
+      })
+
+    return scoreResultSchema.parse({
+      ...provided,
+      questionId: item.question.id,
+      competency: item.question.competency,
+      passed: provided.score >= PASSING_SCORE,
+      sourceIds: [
+        ...new Set([
+          ...(provided.sourceIds ?? []),
+          ...item.question.sourceIds,
+          ...chunks.map((chunk) => chunk.id),
+        ]),
+      ].slice(0, 8),
+    })
   })
 }
 
@@ -488,6 +719,54 @@ function formatChunks(chunks: KnowledgeChunk[]): string {
 
 function formatMessages(messages: InterviewMessage[]): string {
   return messages.map((message) => `${message.role}: ${message.content}`).join('\n')
+}
+
+function formatAnsweredQuestions(answeredQuestions: AnsweredQuestion[]): string {
+  return answeredQuestions
+    .map(
+      (item, index) =>
+        `第 ${index + 1} 题\n问题ID：${item.question.id}\n能力项：${item.question.competency}\n问题：${
+          item.question.question
+        }\n候选人回答：${item.answer}`,
+    )
+    .join('\n\n')
+}
+
+function formatAssessmentRubrics(answeredQuestions: AnsweredQuestion[], bank: Awaited<ReturnType<typeof getInterviewBank>>): string {
+  return JSON.stringify(
+    answeredQuestions.map((item) => {
+      const bankQuestion = getQuestion(bank, item.question.id)
+      const rubric = item.question.rubricId
+        ? getRubric(bank, item.question.rubricId)
+        : bankQuestion
+          ? getRubric(bank, bankQuestion.rubricId)
+          : null
+      const calibrationSamples = bankQuestion ? getCalibrationSamples(bank, bankQuestion.id) : []
+
+      return {
+        questionId: item.question.id,
+        competency: item.question.competency,
+        expectedSignals: bankQuestion?.expectedSignals ?? item.question.expectedSignals,
+        redFlags: bankQuestion?.redFlags ?? item.question.redFlags ?? [],
+        rubric: rubric
+          ? rubric.dimensions.map((dimension) => ({
+              label: dimension.label,
+              weight: dimension.weight,
+              excellent: dimension.excellent,
+              acceptable: dimension.acceptable,
+              weak: dimension.weak,
+            }))
+          : [],
+        calibration: calibrationSamples.slice(0, 3).map((sample) => ({
+          quality: sample.quality,
+          expectedScore: sample.expectedScore,
+          rationale: sample.rationale,
+        })),
+      }
+    }),
+    null,
+    2,
+  )
 }
 
 function formatBankQuestion(question: BankQuestion, rubric: Rubric): string {

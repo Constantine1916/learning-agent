@@ -1,17 +1,22 @@
 import { z } from 'zod'
-import { runAnswerGraph } from '@/lib/agent/graph'
+import {
+  assessFullInterview,
+  extractAnsweredQuestions,
+  materializeStreamingQuestion,
+  prepareStreamingInterviewQuestion,
+  retrieveInterviewKnowledge,
+} from '@/lib/agent/graph'
+import { streamText } from '@/lib/agent/llm'
 import {
   addInterviewMessage,
   addScoreResult,
   getInterviewSession,
   getResumeRecord,
   listInterviewMessages,
-  listScoreResults,
   saveFinalReport,
   updateInterviewSession,
 } from '@/lib/db/repository'
-import { getInterviewBank } from '@/lib/interview-bank/loader'
-import { TARGET_ROUNDS, type FinalReport, type ScoreResult } from '@/lib/types'
+import { TARGET_ROUNDS } from '@/lib/types'
 
 export const runtime = 'nodejs'
 
@@ -29,24 +34,26 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       }
 
       try {
+        const runId = crypto.randomUUID()
         const { id } = await context.params
         const payload = messageSchema.parse(await request.json())
         const session = await getInterviewSession(id)
+        send('run.started', { runId, sessionId: id })
 
         if (!session?.resumeId) {
-          send('error', { error: '没有找到面试会话。' })
+          send('run.failed', { runId, error: '没有找到面试会话。' })
           controller.close()
           return
         }
 
         const resume = await getResumeRecord(session.resumeId)
         if (!resume) {
-          send('error', { error: '没有找到对应简历。' })
+          send('run.failed', { runId, error: '没有找到对应简历。' })
           controller.close()
           return
         }
 
-        send('status', { message: '候选人回答已收到，面试官正在评分。' })
+        send('answer.received', { runId })
         await addInterviewMessage({
           sessionId: session.id,
           role: 'candidate',
@@ -54,73 +61,123 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
         })
 
         const messages = await listInterviewMessages(session.id)
-        const scores = await listScoreResults(session.id)
-        const graphResult = await runAnswerGraph({
+        const answeredRounds = extractAnsweredQuestions(messages).length
+        send('round.done', { runId, answeredRounds, targetRounds: TARGET_ROUNDS })
+        send('retrieval.started', { runId })
+        const retrievedChunks = await retrieveInterviewKnowledge({
           session,
           resume,
           latestAnswer: payload.content,
-          messages,
-          scores,
+        })
+        send('retrieval.done', {
+          runId,
+          chunks: retrievedChunks.map((chunk) => ({
+            id: chunk.id,
+            title: chunk.title,
+            competency: chunk.competency,
+            score: chunk.score,
+            sourceUrl: chunk.sourceUrl,
+          })),
         })
 
-        if (!graphResult.scoreResult) {
-          send('error', { error: '评分失败，请稍后重试。' })
-          controller.close()
-          return
-        }
+        if (answeredRounds >= TARGET_ROUNDS) {
+          send('assessment.started', { runId, answeredRounds })
+          const assessment = await assessFullInterview({
+            resume,
+            messages,
+            chunks: retrievedChunks,
+          })
+          const savedScores = []
+          for (const score of assessment.scores) {
+            savedScores.push(await addScoreResult(session.id, score))
+          }
+          await addInterviewMessage({
+            sessionId: session.id,
+            role: 'score',
+            content: assessment.report.summary,
+            metadata: {
+              kind: 'final-assessment',
+              scores: savedScores,
+              report: assessment.report,
+            },
+          })
+          send('assessment.done', { runId, scores: savedScores, report: assessment.report })
 
-        const score = await addScoreResult(session.id, graphResult.scoreResult)
-        await addInterviewMessage({
-          sessionId: session.id,
-          role: 'score',
-          content: score.feedback,
-          metadata: { score },
-        })
-        send('score', score)
-
-        const completedScores = [...scores, score]
-        if (graphResult.finalReport || completedScores.length >= TARGET_ROUNDS) {
-          const report = graphResult.finalReport ?? (await weightedFallbackReport(completedScores))
+          send('report.started', { runId })
+          const report = assessment.report
           await saveFinalReport(session.id, report)
           await updateInterviewSession(session.id, {
             status: 'completed',
-            round: completedScores.length,
+            round: answeredRounds,
           })
-          send('report', report)
+          send('report.done', { runId, report })
+          send('run.completed', { runId })
           controller.close()
           return
         }
 
-        if (!graphResult.nextQuestion) {
-          send('error', { error: '生成下一题失败，请稍后重试。' })
-          controller.close()
-          return
+        send('message.preparing', { runId })
+        const questionPlan = await prepareStreamingInterviewQuestion({
+          resume,
+          candidateProfile: session.candidateProfile,
+          chunks: retrievedChunks,
+          messages,
+          scores: [],
+          round: answeredRounds + 1,
+        })
+        const streamId = crypto.randomUUID()
+        send('message.started', {
+          runId,
+          streamId,
+          role: 'interviewer',
+          question: { ...questionPlan.question, question: '' },
+        })
+
+        let streamedQuestion = ''
+        try {
+          for await (const delta of streamText(questionPlan.messages)) {
+            streamedQuestion += delta
+            send('message.delta', { runId, streamId, delta })
+          }
+        } catch (error) {
+          console.warn('Question streaming failed; falling back to deterministic question.', error)
         }
 
-        const updatedQuestionPlan = [...session.questionPlan, graphResult.nextQuestion]
+        if (!streamedQuestion.trim()) {
+          for (const delta of chunkText(questionPlan.question.question)) {
+            streamedQuestion += delta
+            send('message.delta', { runId, streamId, delta })
+          }
+        }
+
+        const nextQuestion = materializeStreamingQuestion(questionPlan, streamedQuestion)
+        const updatedQuestionPlan = [...session.questionPlan, nextQuestion]
         const updatedSession = await updateInterviewSession(session.id, {
           status: 'interviewing',
           questionPlan: updatedQuestionPlan,
-          round: completedScores.length,
+          round: answeredRounds,
         })
         const assistantMessage = await addInterviewMessage({
           sessionId: session.id,
           role: 'interviewer',
-          content: graphResult.nextQuestion.question,
+          content: nextQuestion.question,
           metadata: {
-            question: graphResult.nextQuestion,
-            retrievedSourceIds: graphResult.retrievedChunks.map((chunk) => chunk.id),
+            question: nextQuestion,
+            retrievedSourceIds: retrievedChunks.map((chunk) => chunk.id),
           },
         })
 
-        send('message', {
+        send('message.done', {
+          runId,
+          streamId,
           session: updatedSession,
           message: assistantMessage,
-          question: graphResult.nextQuestion,
+          question: nextQuestion,
         })
+        send('run.completed', { runId })
         controller.close()
       } catch (error) {
-        send('error', { error: error instanceof Error ? error.message : '面试消息处理失败。' })
+        send('run.failed', { error: error instanceof Error ? error.message : '面试消息处理失败。' })
         controller.close()
       }
     },
@@ -130,37 +187,15 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     headers: {
       'Content-Type': 'application/x-ndjson; charset=utf-8',
       'Cache-Control': 'no-cache',
+      'X-Accel-Buffering': 'no',
     },
   })
 }
 
-async function weightedFallbackReport(scores: ScoreResult[]): Promise<FinalReport> {
-  const bank = await getInterviewBank()
-  const scoresByCompetency = new Map<string, ScoreResult[]>()
-  for (const score of scores) {
-    scoresByCompetency.set(score.competency, [...(scoresByCompetency.get(score.competency) ?? []), score])
+function chunkText(text: string, size = 3): string[] {
+  const chunks: string[] = []
+  for (let index = 0; index < text.length; index += size) {
+    chunks.push(text.slice(index, index + size))
   }
-
-  let weightedSum = 0
-  let coveredWeight = 0
-  const abilityRadar = [...scoresByCompetency].map(([competencyName, competencyScores]) => {
-    const average = Math.round(
-      competencyScores.reduce((sum, item) => sum + item.score, 0) / Math.max(competencyScores.length, 1),
-    )
-    const weight = bank.competencies.find((competency) => competency.name === competencyName)?.weight ?? 1
-    weightedSum += average * weight
-    coveredWeight += weight
-    return { competency: competencyName, score: average }
-  })
-  const totalScore = coveredWeight ? Math.round(weightedSum / coveredWeight) : 0
-
-  return {
-    totalScore,
-    passed: totalScore >= bank.role.passingScore,
-    summary: '面试结束，系统已按能力项权重生成综合报告。',
-    strengths: scores.filter((item) => item.passed).map((item) => item.competency),
-    weaknesses: scores.filter((item) => !item.passed).map((item) => item.competency),
-    learningAdvice: ['继续补充真实项目案例、上线指标、风险处理和复盘经验。'],
-    abilityRadar,
-  }
+  return chunks
 }

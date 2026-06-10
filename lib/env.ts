@@ -12,6 +12,10 @@ export function getOpenAIBaseUrl() {
   return process.env.OPENAI_BASE_URL || undefined
 }
 
+export function getOpenAIAPIKey() {
+  return process.env.OPENAI_API_KEY
+}
+
 export function getOpenAITimeoutMs() {
   const rawValue = process.env.OPENAI_TIMEOUT_MS || '60000'
   const timeout = Number(rawValue)
